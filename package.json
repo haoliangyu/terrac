@@ -1,0 +1,36 @@
+{
+  "name": "node-project-starter",
+  "version": "0.1.0",
+  "description": "project starter for node module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha 'test/**/*.test.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haoliangyu/node-project-starter.git"
+  },
+  "keywords": [
+    "node",
+    "project",
+    "starter"
+  ],
+  "author": "Haoliang Yu <haholiang.yu@outlook.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/haoliangyu/npm-module-starter/issues"
+  },
+  "homepage": "https://github.com/haoliangyu/npm-module-starter#readme",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "husky": "^4.0.2",
+    "mocha": "^7.0.1",
+    "prettier": "^2.0.0",
+    "pretty-quick": "^2.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  }
+}
