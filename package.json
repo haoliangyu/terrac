@@ -1,63 +1,80 @@
 {
   "name": "tshare",
-  "version": "0.1.0",
-  "description": "project starter for node module",
-  "main": "dist/index.js",
+  "version": "0.0.0",
+  "description": "oclif example Hello World CLI",
+  "author": "Haoliang Yu @haoliangyu",
   "bin": {
-    "tshare": "dist/cli/index.js"
+    "tshare": "./bin/run"
   },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "test": "jest",
-    "build": "tsc --build",
-    "build:clean": "tsc --build --clean"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/haoliangyu/tshare.git"
-  },
-  "keywords": [
-    "terraform",
-    "registry",
-    "aws",
-    "s3"
-  ],
-  "author": "Haoliang Yu <haholiang.yu@outlook.com>",
+  "homepage": "https://github.com/haoliangyu/tshare",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/haoliangyu/tshare/issues"
-  },
-  "homepage": "https://github.com/haoliangyu/tshare#readme",
-  "devDependencies": {
-    "@oclif/test": "^2.2.21",
-    "@types/jest": "^29.2.5",
-    "@types/yargs": "^17.0.19",
-    "husky": "^8.0.3",
-    "jest": "^29.3.1",
-    "prettier": "^2.8.1",
-    "pretty-quick": "^3.1.3",
-    "ts-jest": "^29.0.3",
-    "typescript": "^4.9.4"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
-  },
-  "volta": {
-    "node": "18.12.1",
-    "npm": "8.19.2"
-  },
+  "main": "dist/index.js",
+  "repository": "haoliangyu/tshare",
+  "files": [
+    "/bin",
+    "/dist",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.245.0",
-    "@oclif/core": "^1.24.0",
-    "@types/fs-extra": "^11.0.1",
-    "find-up": "^6.3.0",
+    "@aws-sdk/client-s3": "^3.259.0",
+    "@oclif/core": "^2",
+    "@oclif/plugin-help": "^5",
+    "@oclif/plugin-plugins": "^2.2.2",
     "fs-extra": "^11.1.0",
     "simple-git": "^3.16.0",
-    "yaml": "^2.2.1",
     "zip-a-folder": "^1.1.5"
-  }
+  },
+  "devDependencies": {
+    "@oclif/test": "^2.3.3",
+    "@types/chai": "^4",
+    "@types/fs-extra": "^11.0.1",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.18.11",
+    "chai": "^4",
+    "eslint": "^7.32.0",
+    "eslint-config-oclif": "^4",
+    "eslint-config-oclif-typescript": "^1.0.3",
+    "husky": "^8.0.3",
+    "mocha": "^9",
+    "oclif": "^3",
+    "shx": "^0.3.3",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.4.1",
+    "typescript": "^4.9.4"
+  },
+  "oclif": {
+    "bin": "tshare",
+    "dirname": "tshare",
+    "commands": "./dist/commands",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-plugins"
+    ],
+    "topicSeparator": " ",
+    "topics": {
+      "hello": {
+        "description": "Say hello to the world and others"
+      }
+    }
+  },
+  "scripts": {
+    "build": "shx rm -rf dist && tsc -b",
+    "lint": "eslint . --ext .ts --config .eslintrc",
+    "lint:fix": "eslint . --ext .ts --config .eslintrc --fix",
+    "postpack": "shx rm -f oclif.manifest.json",
+    "posttest": "yarn lint",
+    "prepack": "yarn build && oclif manifest && oclif readme",
+    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
+    "version": "oclif readme && git add README.md",
+    "prepare": "husky install"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "bugs": "https://github.com/haoliangyu/tshare/issues",
+  "keywords": [
+    "oclif"
+  ],
+  "types": "dist/index.d.ts"
 }

@@ -1,9 +1,9 @@
-import { tmpdir } from 'os';
-import { simpleGit } from 'simple-git';
-import { unlinkSync, existsSync, createReadStream } from 'fs-extra';
-import { zip } from 'zip-a-folder';
-import { S3Client, PutObjectCommand, ListObjectsV2Command, ListObjectsV2CommandOutput, GetObjectCommand } from "@aws-sdk/client-s3"; 
-import { ITshareConfig, IModuleMetadata, ModuleAccess, loadConfig } from './utils'
+import {tmpdir} from 'node:os'
+import {simpleGit} from 'simple-git'
+import {unlinkSync, existsSync, createReadStream} from 'fs-extra'
+import {zip} from 'zip-a-folder'
+import {S3Client, PutObjectCommand, ListObjectsV2Command, ListObjectsV2CommandOutput, GetObjectCommand} from '@aws-sdk/client-s3'
+import {ITshareConfig, IModuleMetadata, ModuleAccess, loadConfig} from './utils'
 
 export interface IPublishOptions {
   /**
@@ -13,7 +13,7 @@ export interface IPublishOptions {
 }
 
 /**
- * 
+ *
  * @param config Publish configuration
  */
 export async function publish(rootDir: string, options?: IPublishOptions): Promise<void> {
@@ -28,9 +28,9 @@ export async function publish(rootDir: string, options?: IPublishOptions): Promi
   const zipPath = `${tmpdir()}/${config.module.name}-${config.module.version}.zip`
 
   try {
-    await zip(rootDir, zipPath);
+    await zip(rootDir, zipPath)
 
-    const client = new S3Client({});
+    const client = new S3Client({})
     const testKey = getKey(config)
 
     if (await keyExists(client, config.s3.bucket, testKey)) {
@@ -42,7 +42,7 @@ export async function publish(rootDir: string, options?: IPublishOptions): Promi
     }
 
     const uploadKeys = getExpandedKeys(config)
-    const uploadTasks = uploadKeys.map((key) => putObject(client, config.s3.bucket, key, createReadStream(zipPath)))
+    const uploadTasks = uploadKeys.map(key => putObject(client, config.s3.bucket, key, createReadStream(zipPath)))
 
     await Promise.all(uploadTasks)
 
@@ -54,12 +54,10 @@ export async function publish(rootDir: string, options?: IPublishOptions): Promi
     metadata.history.push({
       version: config.module.version,
       sha: (await git.revparse('HEAD')).trim(),
-      updated
+      updated,
     })
 
     await putObject(client, config.s3.bucket, metadatKey, JSON.stringify(metadata))
-  } catch (error) {
-    throw error
   } finally {
     if (existsSync(zipPath)) {
       unlinkSync(zipPath)
@@ -67,7 +65,7 @@ export async function publish(rootDir: string, options?: IPublishOptions): Promi
   }
 }
 
-function getKey (config: ITshareConfig): string {
+function getKey(config: ITshareConfig): string {
   return `${config.s3.keyPrefix}/${config.module.name}/${config.module.version}.zip`
 }
 
@@ -79,20 +77,20 @@ function getExpandedKeys(config: ITshareConfig): string[] {
     versions.push(
       checkSemver[1],
       `${checkSemver[1]}.${checkSemver[2]}`,
-      config.module.version
+      config.module.version,
     )
   } else {
     versions.push(config.module.version)
   }
 
-  return versions.map((version) => `${config.s3.keyPrefix}/${config.module.name}/${version}.zip`)
+  return versions.map(version => `${config.s3.keyPrefix}/${config.module.name}/${version}.zip`)
 }
 
 async function keyExists(client: S3Client, bucket: string, key: string): Promise<boolean> {
   const listCommand = new ListObjectsV2Command({
     Bucket: bucket,
     Prefix: key,
-    MaxKeys: 1
+    MaxKeys: 1,
   })
   const listResponse: ListObjectsV2CommandOutput = await client.send(listCommand)
 
@@ -103,31 +101,31 @@ async function getMetadata(client: S3Client, config: ITshareConfig, key: string)
   if (await keyExists(client, config.s3.bucket, key)) {
     const getCommand = new GetObjectCommand({
       Bucket: config.s3.bucket,
-      Key: key
+      Key: key,
     })
     const response = await client.send(getCommand) as any
-    const data = await response.Body.transformToString();
+    const data = await response.Body.transformToString()
     return JSON.parse(data) as IModuleMetadata
-  } else {
-    const metadata: IModuleMetadata = {
-      name: config.module.name,
-      version: config.module.version,
-      access: ModuleAccess.private,
-      created: Date.now(),
-      updated: Date.now(),
-      history: []
-    }
-
-    return metadata
   }
+
+  const metadata: IModuleMetadata = {
+    name: config.module.name,
+    version: config.module.version,
+    access: ModuleAccess.private,
+    created: Date.now(),
+    updated: Date.now(),
+    history: [],
+  }
+
+  return metadata
 }
 
 async function putObject(client: S3Client, bucket: string, key: string, data: any): Promise<void> {
   const putCommand = new PutObjectCommand({
     Bucket: bucket,
     Key: key,
-    Body: data
-  });
+    Body: data,
+  })
 
-  await client.send(putCommand);
+  await client.send(putCommand)
 }

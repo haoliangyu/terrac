@@ -1,5 +1,5 @@
-import { writeJson } from 'fs-extra'
-import { ITshareConfig } from './utils'
+import {writeJson} from 'fs-extra'
+import {ITshareConfig} from './utils'
 
 /**
  * Initialize a project with TShare

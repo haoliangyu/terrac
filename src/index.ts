@@ -1,1 +1,1 @@
-module.exports = () => {};
+export {run} from '@oclif/core'

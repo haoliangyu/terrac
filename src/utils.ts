@@ -1,4 +1,4 @@
-import { readJson } from 'fs-extra'
+import {readJson} from 'fs-extra'
 
 /**
  * Module access mode
@@ -65,15 +65,15 @@ export interface ITshareConfig {
   }
 }
 
-export async function loadConfig (rootDir: string): Promise<ITshareConfig> {
+export async function loadConfig(rootDir: string): Promise<ITshareConfig> {
   const config = await readJson(`${rootDir}/tshare.json`)
   const defaults = {
     s3: {
-      keyPrefix: ''
+      keyPrefix: '',
     },
     module: {
-      access: ModuleAccess.private.toString()
-    }
+      access: ModuleAccess.private.toString(),
+    },
   }
 
   return Object.assign({}, defaults, config) as ITshareConfig
