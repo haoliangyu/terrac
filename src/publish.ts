@@ -42,19 +42,12 @@ export async function publish(rootDir: string, options?: IPublishOptions): Promi
     }
 
     const uploadKeys = getExpandedKeys(config)
-    const uploadTasks = uploadKeys.map(async (key) => {
-      const putCommand = new PutObjectCommand({
-        Bucket: config.s3.bucket,
-        Key: key,
-        Body: createReadStream(zipPath)
-      });
-
-      await client.send(putCommand);
-    })
+    const uploadTasks = uploadKeys.map((key) => putObject(client, config.s3.bucket, key, createReadStream(zipPath)))
 
     await Promise.all(uploadTasks)
 
-    const metadata = await getMetadata(client, config)
+    const metadatKey = `${config.s3.keyPrefix}/${config.module.name}/metadata.json`
+    const metadata = await getMetadata(client, config, metadatKey)
     const updated = Date.now()
 
     metadata.updated = updated
@@ -63,6 +56,8 @@ export async function publish(rootDir: string, options?: IPublishOptions): Promi
       sha: (await git.revparse('HEAD')).trim(),
       updated
     })
+
+    await putObject(client, config.s3.bucket, metadatKey, JSON.stringify(metadata))
   } catch (error) {
     throw error
   } finally {
@@ -104,9 +99,7 @@ async function keyExists(client: S3Client, bucket: string, key: string): Promise
   return listResponse.KeyCount === 1
 }
 
-async function getMetadata(client: S3Client, config: ITshareConfig): Promise<IModuleMetadata> {
-  const key = `${config.s3.keyPrefix}/${config.module.name}/metadata.json`
-
+async function getMetadata(client: S3Client, config: ITshareConfig, key: string): Promise<IModuleMetadata> {
   if (await keyExists(client, config.s3.bucket, key)) {
     const getCommand = new GetObjectCommand({
       Bucket: config.s3.bucket,
@@ -127,4 +120,14 @@ async function getMetadata(client: S3Client, config: ITshareConfig): Promise<IMo
 
     return metadata
   }
+}
+
+async function putObject(client: S3Client, bucket: string, key: string, data: any): Promise<void> {
+  const putCommand = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: data
+  });
+
+  await client.send(putCommand);
 }
