@@ -16,39 +16,39 @@ oclif example Hello World CLI
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g tshare
-$ tshare COMMAND
+$ npm install -g terrac
+$ terrac COMMAND
 running command...
-$ tshare (--version)
-tshare/0.0.0 darwin-x64 node-v16.19.0
-$ tshare --help [COMMAND]
+$ terrac (--version)
+terrac/0.0.0 darwin-x64 node-v16.19.0
+$ terrac --help [COMMAND]
 USAGE
-  $ tshare COMMAND
+  $ terrac COMMAND
 ...
 ```
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`tshare hello PERSON`](#tshare-hello-person)
-* [`tshare hello world`](#tshare-hello-world)
-* [`tshare help [COMMANDS]`](#tshare-help-commands)
-* [`tshare plugins`](#tshare-plugins)
-* [`tshare plugins:install PLUGIN...`](#tshare-pluginsinstall-plugin)
-* [`tshare plugins:inspect PLUGIN...`](#tshare-pluginsinspect-plugin)
-* [`tshare plugins:install PLUGIN...`](#tshare-pluginsinstall-plugin-1)
-* [`tshare plugins:link PLUGIN`](#tshare-pluginslink-plugin)
-* [`tshare plugins:uninstall PLUGIN...`](#tshare-pluginsuninstall-plugin)
-* [`tshare plugins:uninstall PLUGIN...`](#tshare-pluginsuninstall-plugin-1)
-* [`tshare plugins:uninstall PLUGIN...`](#tshare-pluginsuninstall-plugin-2)
-* [`tshare plugins update`](#tshare-plugins-update)
+* [`terrac hello PERSON`](#terrac-hello-person)
+* [`terrac hello world`](#terrac-hello-world)
+* [`terrac help [COMMANDS]`](#terrac-help-commands)
+* [`terrac plugins`](#terrac-plugins)
+* [`terrac plugins:install PLUGIN...`](#terrac-pluginsinstall-plugin)
+* [`terrac plugins:inspect PLUGIN...`](#terrac-pluginsinspect-plugin)
+* [`terrac plugins:install PLUGIN...`](#terrac-pluginsinstall-plugin-1)
+* [`terrac plugins:link PLUGIN`](#terrac-pluginslink-plugin)
+* [`terrac plugins:uninstall PLUGIN...`](#terrac-pluginsuninstall-plugin)
+* [`terrac plugins:uninstall PLUGIN...`](#terrac-pluginsuninstall-plugin-1)
+* [`terrac plugins:uninstall PLUGIN...`](#terrac-pluginsuninstall-plugin-2)
+* [`terrac plugins update`](#terrac-plugins-update)
 
-## `tshare hello PERSON`
+## `terrac hello PERSON`
 
 Say hello
 
 ```
 USAGE
-  $ tshare hello [PERSON] -f <value>
+  $ terrac hello [PERSON] -f <value>
 
 ARGUMENTS
   PERSON  Person to say hello to
@@ -64,31 +64,31 @@ EXAMPLES
   hello friend from oclif! (./src/commands/hello/index.ts)
 ```
 
-_See code: [dist/commands/hello/index.ts](https://github.com/haoliangyu/tshare/blob/v0.0.0/dist/commands/hello/index.ts)_
+_See code: [dist/commands/hello/index.ts](https://github.com/haoliangyu/terrac/blob/v0.0.0/dist/commands/hello/index.ts)_
 
-## `tshare hello world`
+## `terrac hello world`
 
 Say hello world
 
 ```
 USAGE
-  $ tshare hello world
+  $ terrac hello world
 
 DESCRIPTION
   Say hello world
 
 EXAMPLES
-  $ tshare hello world
+  $ terrac hello world
   hello world! (./src/commands/hello/world.ts)
 ```
 
-## `tshare help [COMMANDS]`
+## `terrac help [COMMANDS]`
 
-Display help for tshare.
+Display help for terrac.
 
 ```
 USAGE
-  $ tshare help [COMMANDS] [-n]
+  $ terrac help [COMMANDS] [-n]
 
 ARGUMENTS
   COMMANDS  Command to show help for.
@@ -97,18 +97,18 @@ FLAGS
   -n, --nested-commands  Include all nested commands in the output.
 
 DESCRIPTION
-  Display help for tshare.
+  Display help for terrac.
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.0/src/commands/help.ts)_
 
-## `tshare plugins`
+## `terrac plugins`
 
 List installed plugins.
 
 ```
 USAGE
-  $ tshare plugins [--core]
+  $ terrac plugins [--core]
 
 FLAGS
   --core  Show core plugins.
@@ -117,18 +117,18 @@ DESCRIPTION
   List installed plugins.
 
 EXAMPLES
-  $ tshare plugins
+  $ terrac plugins
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.2.2/src/commands/plugins/index.ts)_
 
-## `tshare plugins:install PLUGIN...`
+## `terrac plugins:install PLUGIN...`
 
 Installs a plugin into the CLI.
 
 ```
 USAGE
-  $ tshare plugins:install PLUGIN...
+  $ terrac plugins:install PLUGIN...
 
 ARGUMENTS
   PLUGIN  Plugin to install.
@@ -150,23 +150,23 @@ DESCRIPTION
 
 
 ALIASES
-  $ tshare plugins add
+  $ terrac plugins add
 
 EXAMPLES
-  $ tshare plugins:install myplugin 
+  $ terrac plugins:install myplugin 
 
-  $ tshare plugins:install https://github.com/someuser/someplugin
+  $ terrac plugins:install https://github.com/someuser/someplugin
 
-  $ tshare plugins:install someuser/someplugin
+  $ terrac plugins:install someuser/someplugin
 ```
 
-## `tshare plugins:inspect PLUGIN...`
+## `terrac plugins:inspect PLUGIN...`
 
 Displays installation properties of a plugin.
 
 ```
 USAGE
-  $ tshare plugins:inspect PLUGIN...
+  $ terrac plugins:inspect PLUGIN...
 
 ARGUMENTS
   PLUGIN  [default: .] Plugin to inspect.
@@ -179,16 +179,16 @@ DESCRIPTION
   Displays installation properties of a plugin.
 
 EXAMPLES
-  $ tshare plugins:inspect myplugin
+  $ terrac plugins:inspect myplugin
 ```
 
-## `tshare plugins:install PLUGIN...`
+## `terrac plugins:install PLUGIN...`
 
 Installs a plugin into the CLI.
 
 ```
 USAGE
-  $ tshare plugins:install PLUGIN...
+  $ terrac plugins:install PLUGIN...
 
 ARGUMENTS
   PLUGIN  Plugin to install.
@@ -210,23 +210,23 @@ DESCRIPTION
 
 
 ALIASES
-  $ tshare plugins add
+  $ terrac plugins add
 
 EXAMPLES
-  $ tshare plugins:install myplugin 
+  $ terrac plugins:install myplugin 
 
-  $ tshare plugins:install https://github.com/someuser/someplugin
+  $ terrac plugins:install https://github.com/someuser/someplugin
 
-  $ tshare plugins:install someuser/someplugin
+  $ terrac plugins:install someuser/someplugin
 ```
 
-## `tshare plugins:link PLUGIN`
+## `terrac plugins:link PLUGIN`
 
 Links a plugin into the CLI for development.
 
 ```
 USAGE
-  $ tshare plugins:link PLUGIN
+  $ terrac plugins:link PLUGIN
 
 ARGUMENTS
   PATH  [default: .] path to plugin
@@ -244,16 +244,16 @@ DESCRIPTION
 
 
 EXAMPLES
-  $ tshare plugins:link myplugin
+  $ terrac plugins:link myplugin
 ```
 
-## `tshare plugins:uninstall PLUGIN...`
+## `terrac plugins:uninstall PLUGIN...`
 
 Removes a plugin from the CLI.
 
 ```
 USAGE
-  $ tshare plugins:uninstall PLUGIN...
+  $ terrac plugins:uninstall PLUGIN...
 
 ARGUMENTS
   PLUGIN  plugin to uninstall
@@ -266,17 +266,17 @@ DESCRIPTION
   Removes a plugin from the CLI.
 
 ALIASES
-  $ tshare plugins unlink
-  $ tshare plugins remove
+  $ terrac plugins unlink
+  $ terrac plugins remove
 ```
 
-## `tshare plugins:uninstall PLUGIN...`
+## `terrac plugins:uninstall PLUGIN...`
 
 Removes a plugin from the CLI.
 
 ```
 USAGE
-  $ tshare plugins:uninstall PLUGIN...
+  $ terrac plugins:uninstall PLUGIN...
 
 ARGUMENTS
   PLUGIN  plugin to uninstall
@@ -289,17 +289,17 @@ DESCRIPTION
   Removes a plugin from the CLI.
 
 ALIASES
-  $ tshare plugins unlink
-  $ tshare plugins remove
+  $ terrac plugins unlink
+  $ terrac plugins remove
 ```
 
-## `tshare plugins:uninstall PLUGIN...`
+## `terrac plugins:uninstall PLUGIN...`
 
 Removes a plugin from the CLI.
 
 ```
 USAGE
-  $ tshare plugins:uninstall PLUGIN...
+  $ terrac plugins:uninstall PLUGIN...
 
 ARGUMENTS
   PLUGIN  plugin to uninstall
@@ -312,17 +312,17 @@ DESCRIPTION
   Removes a plugin from the CLI.
 
 ALIASES
-  $ tshare plugins unlink
-  $ tshare plugins remove
+  $ terrac plugins unlink
+  $ terrac plugins remove
 ```
 
-## `tshare plugins update`
+## `terrac plugins update`
 
 Update installed plugins.
 
 ```
 USAGE
-  $ tshare plugins update [-h] [-v]
+  $ terrac plugins update [-h] [-v]
 
 FLAGS
   -h, --help     Show CLI help.

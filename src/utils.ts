@@ -1,80 +1,36 @@
 import {readJson} from 'fs-extra'
+import {ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client} from '@aws-sdk/client-s3'
 
-/**
- * Module access mode
- */
-export enum ModuleAccess {
-  /**
-   * Private access
-   */
-  private,
-  /**
-   * Public access
-   */
-  public
-}
+import {IProjectConfig} from './types/project'
 
-export interface ModuleRelease {
-  version: string
-  updated: number
-  sha: string
-}
-
-export interface IModuleMetadata {
-  name: string
-  version: string
-  access: ModuleAccess
-  created: number
-  updated: number
-  history: ModuleRelease[]
-}
-
-/**
- * TShare project configuration
- */
-export interface ITshareConfig {
-  /**
-   * S3 configuration
-   */
-  s3: {
-    /**
-     * Bucket name
-     */
-    bucket: string
-    /**
-     * Object key prefix
-     */
-    keyPrefix?: string
-  }
-  /**
-   * Terraform module metadata
-   */
-  module: {
-    /**
-     * Module name
-     */
-    name: string
-    /**
-     * Module version
-     */
-    version: string
-    /**
-     * Module access mode
-     */
-    access?: ModuleAccess
-  }
-}
-
-export async function loadConfig(rootDir: string): Promise<ITshareConfig> {
-  const config = await readJson(`${rootDir}/tshare.json`)
+export async function loadConfig(rootDir: string): Promise<IProjectConfig> {
+  const config = await readJson(`${rootDir}/terrac.json`)
   const defaults = {
-    s3: {
+    backend: {
       keyPrefix: '',
     },
-    module: {
-      access: ModuleAccess.private.toString(),
-    },
   }
 
-  return Object.assign({}, defaults, config) as ITshareConfig
+  return Object.assign({}, defaults, config) as IProjectConfig
+}
+
+export async function keyExists(client: S3Client, bucket: string, key: string): Promise<boolean> {
+  const listCommand = new ListObjectsV2Command({
+    Bucket: bucket,
+    Prefix: key,
+    MaxKeys: 1,
+  })
+  const listResponse: ListObjectsV2CommandOutput = await client.send(listCommand)
+
+  return listResponse.KeyCount === 1
+}
+
+export function getMetaKey(prefix: string, moduleName: string): string {
+  const baseKey = `${moduleName}/meta.json`
+  return prefix ? `${prefix}${baseKey}` : baseKey
+}
+
+export function getPackageKey(prefix: string, moduleName: string, moduleVersion: string): string {
+  const baseKey = `${moduleName}/${moduleVersion}/module.zip`
+  return prefix ? `${prefix}${baseKey}` : baseKey
 }
