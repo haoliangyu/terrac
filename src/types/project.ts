@@ -1,23 +1,5 @@
 import {IModule} from './module'
-
-export interface IProjectBackendS3 {
-  /**
-   * Backend type
-   */
-  type: 's3'
-  /**
-   * Bucket name
-   */
-  bucket: string
-  /**
-   * Bucket region
-   */
-  region: string
-  /**
-   * Object key prefix
-   */
-  keyPrefix?: string
-}
+import {IBackendConfig} from '../backends/factory'
 
 /**
  * Project configuration
@@ -26,7 +8,7 @@ export interface IProjectConfig {
   /**
    * backend configuration
    */
-  backend: IProjectBackendS3
+  backend: IBackendConfig
   /**
    * Terraform module information
    */

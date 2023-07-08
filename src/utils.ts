@@ -1,9 +1,9 @@
 import {readJson} from 'fs-extra'
-import {ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client} from '@aws-sdk/client-s3'
+import {set} from 'lodash'
 
 import {IProjectConfig} from './types/project'
 
-export async function loadConfig(rootDir: string): Promise<IProjectConfig> {
+export async function loadConfig(rootDir: string, overwrites: { [key: string]: string } = {}): Promise<IProjectConfig> {
   const config = await readJson(`${rootDir}/terrac.json`)
   const defaults = {
     backend: {
@@ -11,26 +11,39 @@ export async function loadConfig(rootDir: string): Promise<IProjectConfig> {
     },
   }
 
-  return Object.assign({}, defaults, config) as IProjectConfig
+  const result = Object.assign({}, defaults, config) as IProjectConfig
+
+  for (const [key, value] of Object.entries(overwrites)) {
+    set(result, key, value)
+  }
+
+  return result
 }
 
-export async function keyExists(client: S3Client, bucket: string, key: string): Promise<boolean> {
-  const listCommand = new ListObjectsV2Command({
-    Bucket: bucket,
-    Prefix: key,
-    MaxKeys: 1,
-  })
-  const listResponse: ListObjectsV2CommandOutput = await client.send(listCommand)
+export function expandVersion(version: string): string[] {
+  const versions = []
+  const checkSemver = version.match(/(\d+)\.(\d+)\.(\d+)/)
 
-  return listResponse.KeyCount === 1
+  if (checkSemver) {
+    versions.push(
+      checkSemver[1],
+      `${checkSemver[1]}.${checkSemver[2]}`,
+      version,
+    )
+  } else {
+    versions.push(version)
+  }
+
+  return versions
 }
 
-export function getMetaKey(prefix: string, moduleName: string): string {
-  const baseKey = `${moduleName}/meta.json`
-  return prefix ? `${prefix}${baseKey}` : baseKey
-}
+export function parseConfigOverwrites(inputs: string[] = []): { [key: string]: string } {
+  const overwrites: { [key: string]: string } = {}
 
-export function getPackageKey(prefix: string, moduleName: string, moduleVersion: string): string {
-  const baseKey = `${moduleName}/${moduleVersion}/module.zip`
-  return prefix ? `${prefix}${baseKey}` : baseKey
+  for (const conifg of inputs) {
+    const [key, value] = conifg.split('=')
+    overwrites[key] = value
+  }
+
+  return overwrites
 }
