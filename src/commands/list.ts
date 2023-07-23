@@ -1,10 +1,10 @@
 import {Args, Flags, Command} from '@oclif/core'
-
+import {gt} from 'semver'
 import {loadConfig, parseConfigOverwrites} from '../utils'
 import {BackendFactory} from '../backends/factory'
 
-export default class GetUrl extends Command {
-  static description = 'Get the downloadable URL for the module package'
+export default class List extends Command {
+  static description = 'List specific modules and versions in the registry,'
 
   static examples = [
     '<%= config.bin %> <%= command.id %>',
@@ -13,10 +13,6 @@ export default class GetUrl extends Command {
   static args = {
     name: Args.string({
       description: 'Module name',
-      required: true,
-    }),
-    version: Args.string({
-      description: 'Module version',
       required: false,
     }),
   }
@@ -33,15 +29,31 @@ export default class GetUrl extends Command {
   }
 
   public async run(): Promise<void> {
-    const {args, flags} = await this.parse(GetUrl)
+    const {args, flags} = await this.parse(List)
 
-    const {name, version} = args
+    const {name} = args
     const workDir = flags['work-directory']
     const config = await loadConfig(workDir, parseConfigOverwrites(flags['overwrite-config']))
 
     const backend = BackendFactory.create(config.backend)
-    const url = await backend.getSourceUrl(name, version)
+    const modules = await backend.list(name)
 
-    this.log(url)
+    if (name) {
+      modules.sort((a, b) => {
+        const aVersion = a.version || ''
+        const bVersion = b.version || ''
+        return gt(aVersion, bVersion) ? -1 : 1
+      })
+
+      for (const module of modules) {
+        this.log(module.version)
+      }
+    } else {
+      modules.sort((a, b) => a.name.localeCompare(b.name))
+
+      for (const module of modules) {
+        this.log(module.name)
+      }
+    }
   }
 }

@@ -1,9 +1,9 @@
-import {IBackend} from './factory'
+import {IBackend, IModuleListItem} from './factory'
 import {expandVersion} from '../utils'
 import {IModuleMeta} from '../types/module'
 import {ModuleAlreadyExistsError, ModuleNotFoundError} from '../errors'
 
-import {copy, pathExists, readJson, writeJson} from 'fs-extra'
+import {copy, pathExists, readJson, writeJson, readdir} from 'fs-extra'
 
 export interface IBackendConfigLocalDirectory {
   /**
@@ -59,10 +59,40 @@ export class BackendLocalDirectory implements IBackend {
       throw new ModuleNotFoundError()
     }
 
-    return this.getPackagePath(name, targetVersion)
+    return path
   }
 
-  public async getMeta(name: string): Promise<IModuleMeta> {
+  public async list(name?: string): Promise<IModuleListItem[]> {
+    const moduleList = []
+
+    if (name) {
+      const modulePath = `${this.config.path}/${name}`
+
+      if (!(await pathExists(modulePath))) {
+        throw new ModuleNotFoundError()
+      }
+
+      const versions = await this.listDir(modulePath)
+
+      for (const version of versions) {
+        moduleList.push({
+          name,
+          version,
+        })
+      }
+    } else {
+      const names = await this.listDir(this.config.path)
+      for (const name of names) {
+        moduleList.push({
+          name,
+        })
+      }
+    }
+
+    return moduleList
+  }
+
+  private async getMeta(name: string): Promise<IModuleMeta> {
     const path = this.getMetaPath(name)
 
     if (await pathExists(path)) {
@@ -80,7 +110,7 @@ export class BackendLocalDirectory implements IBackend {
     return meta
   }
 
-  public async saveMeta(name: string, meta: IModuleMeta): Promise<void> {
+  private async saveMeta(name: string, meta: IModuleMeta): Promise<void> {
     const path = this.getMetaPath(name)
     await writeJson(path, meta)
   }
@@ -91,5 +121,12 @@ export class BackendLocalDirectory implements IBackend {
 
   private getPackagePath(name: string, version: string): string {
     return `${this.config.path}/${name}/${version}/module.zip`
+  }
+
+  private async listDir(path: string): Promise<string[]> {
+    const files = await readdir(path, {withFileTypes: true})
+    return files
+    .filter(file => file.isDirectory())
+    .map(file => file.name)
   }
 }

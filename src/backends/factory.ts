@@ -1,17 +1,19 @@
-import {IModuleMeta} from '../types/module'
 import {BackendS3, IBackendConfigS3} from './s3'
 import {BackendLocalDirectory, IBackendConfigLocalDirectory} from './local-directory'
 
 export type IBackendConfig = IBackendConfigS3 | IBackendConfigLocalDirectory
 
+export type IModuleListItem = {
+  name: string
+  version?: string
+}
+
 export interface IBackend {
   publish: (name: string, version: string, packagePath: string) => Promise<void>
 
+  list: (name?: string) => Promise<IModuleListItem[]>
+
   getSourceUrl: (name: string, version?: string) => Promise<string>
-
-  getMeta: (name: string) => Promise<IModuleMeta>
-
-  saveMeta: (name: string, meta: IModuleMeta) => Promise<void>
 }
 
 export class BackendFactory {

@@ -11,7 +11,7 @@ const s3 = new S3Client({
 const bucket = process.env.TEST_BUCKET as string
 const localDir = `${tmpdir()}/terrac-publish-test-${Date.now()}`
 
-describe('src/commands/publish', () => {
+describe('publish', () => {
   test
   .stdout()
   .command([

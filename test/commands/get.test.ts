@@ -7,7 +7,7 @@ import {IModuleMeta} from '../../src/types/module'
 // provision local directory for testing
 const localDirPrefix = `${tmpdir()}/terrac-get-url-test-${Date.now()}`
 
-describe('get-url', () => {
+describe('get', () => {
   test
   .stdout()
   .do(async () => {
@@ -29,7 +29,7 @@ describe('get-url', () => {
     await outputFile(`${localDirPrefix}-1/test-module/1.2.3/module.zip`, 'test')
   })
   .command([
-    'get-url',
+    'get',
     'test-module',
     '--work-directory',
     'test/fixtures/basic-module-local-directory',
@@ -66,7 +66,7 @@ describe('get-url', () => {
     await outputFile(`${localDirPrefix}-2/test-module/1.2.4/module.zip`, 'test')
   })
   .command([
-    'get-url',
+    'get',
     'test-module',
     '1.2.3',
     '--work-directory',

@@ -1,10 +1,11 @@
-import {IBackend} from './factory'
+import {IBackend, IModuleListItem} from './factory'
 import {expandVersion} from '../utils'
 import {IModuleMeta} from '../types/module'
 import {ModuleAlreadyExistsError, ModuleNotFoundError} from '../errors'
 
 import {createReadStream} from 'fs-extra'
-import {S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand} from '@aws-sdk/client-s3'
+import {uniqBy} from 'lodash'
+import {S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand, ListObjectsV2Command} from '@aws-sdk/client-s3'
 
 export interface IBackendConfigS3 {
   /**
@@ -78,7 +79,41 @@ export class BackendS3 implements IBackend {
     return `s3::https://s3-${this.config.region}.amazonaws.com/${this.config.bucket}/${this.getPackageKey(name, targetVersion)}`
   }
 
-  public async getMeta(name: string): Promise<IModuleMeta> {
+  public async list(name?: string): Promise<IModuleListItem[]> {
+    const moduleList = []
+    const prefix = this.config.keyPrefix || ''
+
+    if (name) {
+      const moduleKey = `${prefix}${name}`
+
+      if (!(await this.keyExists(moduleKey))) {
+        throw new ModuleNotFoundError()
+      }
+
+      const keys = await this.listKeys(moduleKey)
+      const versions = uniqBy(keys, key => key.replace(moduleKey, '').split('/').shift())
+
+      for (const version of versions) {
+        moduleList.push({
+          name,
+          version,
+        })
+      }
+    } else {
+      const keys = await this.listKeys(prefix)
+      const names = uniqBy(keys, key => key.replace(prefix, '').split('/').shift())
+
+      for (const name of names) {
+        moduleList.push({
+          name,
+        })
+      }
+    }
+
+    return moduleList
+  }
+
+  private async getMeta(name: string): Promise<IModuleMeta> {
     const bucket = this.config.bucket
     const key = this.getMetaKey(name)
 
@@ -103,7 +138,7 @@ export class BackendS3 implements IBackend {
     return meta
   }
 
-  public async saveMeta(name: string, meta: IModuleMeta): Promise<void> {
+  private async saveMeta(name: string, meta: IModuleMeta): Promise<void> {
     const metaKey = this.getMetaKey(name)
     await this.putObject(metaKey, JSON.stringify(meta))
   }
@@ -131,6 +166,16 @@ export class BackendS3 implements IBackend {
     } catch (error) {
       return false
     }
+  }
+
+  private async listKeys(prefix: string): Promise<string[]> {
+    const command = new ListObjectsV2Command({
+      Bucket: this.config.bucket,
+      Prefix: prefix,
+    })
+    const response = await this.client.send(command)
+
+    return response.Contents ? response.Contents.map(item => item.Key as string) : []
   }
 
   private getMetaKey(name: string): string {
