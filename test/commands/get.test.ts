@@ -7,7 +7,7 @@ import {IModuleMeta} from '../../src/types/module'
 // provision local directory for testing
 const localDirPrefix = `${tmpdir()}/terrac-get-url-test-${Date.now()}`
 
-describe('get', () => {
+describe('commands/get', () => {
   test
   .stdout()
   .do(async () => {

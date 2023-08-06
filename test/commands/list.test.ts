@@ -6,7 +6,7 @@ import {IModuleMeta} from '../../src/types/module'
 
 const localDirPrefix = `${tmpdir()}/terrac-list-test-${Date.now()}`
 
-describe('list', () => {
+describe('commands/list', () => {
   test
   .stdout()
   .do(async () => {

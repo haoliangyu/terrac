@@ -11,7 +11,7 @@ awslocal s3api create-bucket --bucket $TEST_BUCKET
 awslocal s3 rm s3://$TEST_BUCKET --recursive
 
 # run tests
-npx mocha --forbid-only "test/**/*.test.ts"
+npx mocha --forbid-only "test/backends/s3.test.ts"
 
 # clean up all test objects
 awslocal s3 rm s3://$TEST_BUCKET --recursive
