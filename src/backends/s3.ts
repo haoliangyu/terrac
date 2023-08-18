@@ -4,7 +4,7 @@ import {IModuleMeta} from '../types/module'
 import {ModuleAlreadyExistsError, ModuleNotFoundError} from '../errors'
 
 import {createReadStream} from 'fs-extra'
-import {uniqBy} from 'lodash'
+import {uniq} from 'lodash'
 import {S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand, ListObjectsV2Command} from '@aws-sdk/client-s3'
 
 export interface IBackendConfigS3 {
@@ -76,7 +76,7 @@ export class BackendS3 implements IBackend {
       throw new ModuleNotFoundError()
     }
 
-    return `s3::https://s3-${this.config.region}.amazonaws.com/${this.config.bucket}/${this.getPackageKey(name, targetVersion)}`
+    return `s3::https://s3-${this.config.region}.amazonaws.com/${this.config.bucket}/${key}`
   }
 
   public async list(name?: string): Promise<IModuleListItem[]> {
@@ -84,24 +84,21 @@ export class BackendS3 implements IBackend {
     const prefix = this.config.keyPrefix || ''
 
     if (name) {
-      const moduleKey = `${prefix}${name}`
-
-      if (!(await this.keyExists(moduleKey))) {
+      if (!(await this.keyExists(this.getMetaKey(name)))) {
         throw new ModuleNotFoundError()
       }
 
-      const keys = await this.listKeys(moduleKey)
-      const versions = uniqBy(keys, key => key.replace(moduleKey, '').split('/').shift())
+      const meta = await this.getMeta(name)
 
-      for (const version of versions) {
+      for (const release of meta.releases) {
         moduleList.push({
           name,
-          version,
+          version: release.version,
         })
       }
     } else {
       const keys = await this.listKeys(prefix)
-      const names = uniqBy(keys, key => key.replace(prefix, '').split('/').shift())
+      const names = uniq(keys.map(key => key.replace(prefix, '').split('/').shift() as string))
 
       for (const name of names) {
         moduleList.push({

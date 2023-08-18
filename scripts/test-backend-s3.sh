@@ -1,5 +1,7 @@
 export TEST_BUCKET=terrac-test
 export TERRAC_BACKEND_S3_ENDPOINT=http://s3.localhost.localstack.cloud:4566
+export AWS_ACCESS_KEY_ID=test
+export AWS_SECRET_ACCESS_KEY=test
 
 # make sure localstack is running
 localstack start -d
