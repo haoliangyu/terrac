@@ -9,7 +9,7 @@ on:
       - master
 
 jobs:
-  build:
+  unit-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,4 +18,37 @@ jobs:
           node-version: 18
       - run: npm ci
       - run: npm run lint
-      - run: npm run test
+      - run: npm run test:commands
+
+  backend-local-test:
+    runs-on: ubuntu-latest
+    needs:
+      - unit-test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run test:backends:local
+
+  backend-se-test:
+    runs-on: ubuntu-latest
+    needs:
+      - unit-test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - name: Start LocalStack
+        run: |
+          pip install localstack awscli-local       # install LocalStack cli and awslocal
+          docker pull localstack/localstack         # Make sure to pull the latest version of the image
+          localstack start -d                       # Start LocalStack in the background
+          
+          echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
+          localstack wait -t 30                     # to become ready before timing out 
+          echo "Startup complete"  
+      - run: npm run test:backends:s3
