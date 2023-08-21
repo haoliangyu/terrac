@@ -1,46 +1,107 @@
-oclif-hello-world
-=================
+# terrac
 
-oclif example Hello World CLI
+A simple CLI tool to quickly setup a minimal private terraform module registry with your cloud storage service.
 
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/oclif-hello-world.svg)](https://npmjs.org/package/oclif-hello-world)
-[![CircleCI](https://circleci.com/gh/oclif/hello-world/tree/main.svg?style=shield)](https://circleci.com/gh/oclif/hello-world/tree/main)
-[![Downloads/week](https://img.shields.io/npm/dw/oclif-hello-world.svg)](https://npmjs.org/package/oclif-hello-world)
 [![License](https://img.shields.io/npm/l/oclif-hello-world.svg)](https://github.com/oclif/hello-world/blob/main/package.json)
+[![Main](https://github.com/haoliangyu/terrac/actions/workflows/main.yaml/badge.svg)](https://github.com/haoliangyu/terrac/actions/workflows/main.yaml)
 
 <!-- toc -->
-* [Usage](#usage)
+* [Why](#why)
+* [Design](#design)
+* [Installation](#installation)
+* [Configuration](#configuration)
 * [Commands](#commands)
+* [Backends](#backends)
+* [Limitations](#limitations)
+* [Roadmap](#roadmap)
 <!-- tocstop -->
-# Usage
-<!-- usage -->
-```sh-session
-$ npm install -g terrac
-$ terrac COMMAND
-running command...
-$ terrac (--version)
-terrac/0.0.0 darwin-x64 node-v16.19.0
-$ terrac --help [COMMAND]
-USAGE
-  $ terrac COMMAND
-...
+
+## Why
+<!-- why -->
+
+Sharing terraform module privately is usually necessary when the infrastructure development happens across multiple teams (DevOps vs applications) or multiple repositories (core vs. app infrastructure). 
+
+While a module can be downloaded from a git URL, it lacks the support to code versionization and storage management. While other paid solutions (like [Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/registry)) or open-source solutions (like [citizen](https://github.com/outsideris/citizen)) exist as a full-feature registry, they are usually overkill for small teams, in terms of const, features, or maintenance.
+
+The `terrac` CLI provides a thin layer on your choice of cloud storage service, such as [AWS S3](https://aws.amazon.com/s3/) or [GCP Cloud Storage](https://cloud.google.com/storage/), to publish and share private module code.  It provides features:
+
+* Publish and download with [semver](https://semver.org)
+* Manage storage schema and metadata automatically
+* Fully integrated with your infrastructure
+* Completely serverless (no hosting)
+* Simple commands (npm-style)
+* Free and flexible
+
+It is suitable to use as a private terraform registry in small teams (while limitations apply).
+
+<!-- whystop -->
+
+## Design
+<!-- design -->
+
+The desing of `terrac` consists of three components:
+* **Configuration**: a JSON file to provide configurations on the module and the cloud storage service
+* **Commands**: a set of commands to provide user interface and interaction
+* **Backends**: a set of standard abstractions for different cloud storage services. All backends expose the same interface to the commands and encapuslate the details of interaction with the remote API.
+
+```mermaid
+graph TD;
+    Configuration-->Command:publish;
+    Command:publish-->Backend:s3;
+    Backend:s3-->S3;
 ```
-<!-- usagestop -->
-# Commands
+
+<!-- designstop -->
+
+## Installation
+<!-- installation -->
+ 
+### npm
+
+```bash
+npm install -g terrac
+```
+<!-- installationstop -->
+
+## Configuration
+<!-- configuration -->
+
+A `terrac.json` file at the module root directory is used to provide configuration for the CLI tool. It contains two objects:
+* **backend** to provide the cloud storage configuration
+* **module** to provide the module metadata
+
+The JSON configuration can be populated interactively using the `terrac init` command and this is an example:
+
+``` json
+{
+  "backend": {
+    "type": "s3",
+    "bucket": "team-sharing",
+    "region": "us-east-1"
+  },
+  "module": {
+    "name": "custom-rds-module",
+    "version": "1.6.3"
+  }
+}
+```
+
+### Backend
+
+See the [Backends](#backends) section for more details.
+
+### Module
+
+The `module` object describes the meta information for the module to publish:
+* **name**: module name
+* **version**: module version number. This could be a sematic version or a custom string.
+
+<!-- configurationstop -->
+
+## Commands
 <!-- commands -->
 * [`terrac hello PERSON`](#terrac-hello-person)
-* [`terrac hello world`](#terrac-hello-world)
-* [`terrac help [COMMANDS]`](#terrac-help-commands)
-* [`terrac plugins`](#terrac-plugins)
-* [`terrac plugins:install PLUGIN...`](#terrac-pluginsinstall-plugin)
-* [`terrac plugins:inspect PLUGIN...`](#terrac-pluginsinspect-plugin)
-* [`terrac plugins:install PLUGIN...`](#terrac-pluginsinstall-plugin-1)
-* [`terrac plugins:link PLUGIN`](#terrac-pluginslink-plugin)
-* [`terrac plugins:uninstall PLUGIN...`](#terrac-pluginsuninstall-plugin)
-* [`terrac plugins:uninstall PLUGIN...`](#terrac-pluginsuninstall-plugin-1)
-* [`terrac plugins:uninstall PLUGIN...`](#terrac-pluginsuninstall-plugin-2)
-* [`terrac plugins update`](#terrac-plugins-update)
 
 ## `terrac hello PERSON`
 
@@ -66,269 +127,30 @@ EXAMPLES
 
 _See code: [dist/commands/hello/index.ts](https://github.com/haoliangyu/terrac/blob/v0.0.0/dist/commands/hello/index.ts)_
 
-## `terrac hello world`
-
-Say hello world
-
-```
-USAGE
-  $ terrac hello world
-
-DESCRIPTION
-  Say hello world
-
-EXAMPLES
-  $ terrac hello world
-  hello world! (./src/commands/hello/world.ts)
-```
-
-## `terrac help [COMMANDS]`
-
-Display help for terrac.
-
-```
-USAGE
-  $ terrac help [COMMANDS] [-n]
-
-ARGUMENTS
-  COMMANDS  Command to show help for.
-
-FLAGS
-  -n, --nested-commands  Include all nested commands in the output.
-
-DESCRIPTION
-  Display help for terrac.
-```
-
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.0/src/commands/help.ts)_
-
-## `terrac plugins`
-
-List installed plugins.
-
-```
-USAGE
-  $ terrac plugins [--core]
-
-FLAGS
-  --core  Show core plugins.
-
-DESCRIPTION
-  List installed plugins.
-
-EXAMPLES
-  $ terrac plugins
-```
-
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.2.2/src/commands/plugins/index.ts)_
-
-## `terrac plugins:install PLUGIN...`
-
-Installs a plugin into the CLI.
-
-```
-USAGE
-  $ terrac plugins:install PLUGIN...
-
-ARGUMENTS
-  PLUGIN  Plugin to install.
-
-FLAGS
-  -f, --force    Run yarn install with force flag.
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Installs a plugin into the CLI.
-  Can be installed from npm or a git url.
-
-  Installation of a user-installed plugin will override a core plugin.
-
-  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
-  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
-  the CLI without the need to patch and update the whole CLI.
-
-
-ALIASES
-  $ terrac plugins add
-
-EXAMPLES
-  $ terrac plugins:install myplugin 
-
-  $ terrac plugins:install https://github.com/someuser/someplugin
-
-  $ terrac plugins:install someuser/someplugin
-```
-
-## `terrac plugins:inspect PLUGIN...`
-
-Displays installation properties of a plugin.
-
-```
-USAGE
-  $ terrac plugins:inspect PLUGIN...
-
-ARGUMENTS
-  PLUGIN  [default: .] Plugin to inspect.
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Displays installation properties of a plugin.
-
-EXAMPLES
-  $ terrac plugins:inspect myplugin
-```
-
-## `terrac plugins:install PLUGIN...`
-
-Installs a plugin into the CLI.
-
-```
-USAGE
-  $ terrac plugins:install PLUGIN...
-
-ARGUMENTS
-  PLUGIN  Plugin to install.
-
-FLAGS
-  -f, --force    Run yarn install with force flag.
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Installs a plugin into the CLI.
-  Can be installed from npm or a git url.
-
-  Installation of a user-installed plugin will override a core plugin.
-
-  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
-  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
-  the CLI without the need to patch and update the whole CLI.
-
-
-ALIASES
-  $ terrac plugins add
-
-EXAMPLES
-  $ terrac plugins:install myplugin 
-
-  $ terrac plugins:install https://github.com/someuser/someplugin
-
-  $ terrac plugins:install someuser/someplugin
-```
-
-## `terrac plugins:link PLUGIN`
-
-Links a plugin into the CLI for development.
-
-```
-USAGE
-  $ terrac plugins:link PLUGIN
-
-ARGUMENTS
-  PATH  [default: .] path to plugin
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Links a plugin into the CLI for development.
-  Installation of a linked plugin will override a user-installed or core plugin.
-
-  e.g. If you have a user-installed or core plugin that has a 'hello' command, installing a linked plugin with a 'hello'
-  command will override the user-installed or core plugin implementation. This is useful for development work.
-
-
-EXAMPLES
-  $ terrac plugins:link myplugin
-```
-
-## `terrac plugins:uninstall PLUGIN...`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ terrac plugins:uninstall PLUGIN...
-
-ARGUMENTS
-  PLUGIN  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ terrac plugins unlink
-  $ terrac plugins remove
-```
-
-## `terrac plugins:uninstall PLUGIN...`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ terrac plugins:uninstall PLUGIN...
-
-ARGUMENTS
-  PLUGIN  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ terrac plugins unlink
-  $ terrac plugins remove
-```
-
-## `terrac plugins:uninstall PLUGIN...`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ terrac plugins:uninstall PLUGIN...
-
-ARGUMENTS
-  PLUGIN  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ terrac plugins unlink
-  $ terrac plugins remove
-```
-
-## `terrac plugins update`
-
-Update installed plugins.
-
-```
-USAGE
-  $ terrac plugins update [-h] [-v]
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Update installed plugins.
-```
 <!-- commandsstop -->
+
+## Backends
+<!-- backends -->
+
+<!-- backendsstop -->
+
+## Limitations
+<!-- limitations -->
+
+<!-- limitationsstop -->
+
+## Roadmap
+<!-- roadmap -->
+
+* Features
+  * [ ] Add `overwrite` option to the `publish` command
+  * [ ] Add `init` command to interatively initialize a module project
+  * [ ] Add schema check to the terrac configuration file
+  * [ ] Install with brew
+  * [ ] Install with bash script
+* Backends
+  * [ ] GCP Cloud Storage
+  * [ ] Azure Blob Storage
+* Maintenance
+  * [ ] Automate release process
+<!-- roadmapstop -->
