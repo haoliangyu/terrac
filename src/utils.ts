@@ -1,3 +1,4 @@
+import {EOL} from 'node:os'
 import {readJson} from 'fs-extra'
 import {set} from 'lodash'
 
@@ -46,4 +47,14 @@ export function parseConfigOverwrites(inputs: string[] = []): { [key: string]: s
   }
 
   return overwrites
+}
+
+export function printKV(data: Record<string, string>): string {
+  const lines = []
+
+  for (const [key, value] of Object.entries(data)) {
+    lines.push(`${key}:\t${value}`)
+  }
+
+  return lines.join(EOL)
 }

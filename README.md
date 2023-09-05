@@ -7,6 +7,7 @@ A simple CLI tool to quickly setup a minimal private terraform module registry w
 [![Main](https://github.com/haoliangyu/terrac/actions/workflows/main.yaml/badge.svg)](https://github.com/haoliangyu/terrac/actions/workflows/main.yaml)
 
 <!-- toc -->
+
 * [Why](#why)
 * [Design](#design)
 * [Installation](#installation)
@@ -15,12 +16,14 @@ A simple CLI tool to quickly setup a minimal private terraform module registry w
 * [Backends](#backends)
 * [Limitations](#limitations)
 * [Roadmap](#roadmap)
+
 <!-- tocstop -->
 
 ## Why
+
 <!-- why -->
 
-Sharing terraform module privately is usually necessary when the infrastructure development happens across multiple teams (DevOps vs applications) or multiple repositories (core vs. app infrastructure). 
+Sharing terraform module privately is usually necessary when the infrastructure development happens across multiple teams (DevOps vs applications) or multiple repositories (core vs. app infrastructure).
 
 While a module can be downloaded from a git URL, it lacks the support to code versionization and storage management. While other paid solutions (like [Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/registry)) or open-source solutions (like [citizen](https://github.com/outsideris/citizen)) exist as a full-feature registry, they are usually overkill for small teams, in terms of const, features, or maintenance.
 
@@ -38,9 +41,11 @@ It is suitable to use as a private terraform registry in small teams (while limi
 <!-- whystop -->
 
 ## Design
+
 <!-- design -->
 
 The desing of `terrac` consists of three components:
+
 * **Configuration**: a JSON file to provide configurations on the module and the cloud storage service
 * **Commands**: a set of commands to provide user interface and interaction
 * **Backends**: a set of standard abstractions for different cloud storage services. All backends expose the same interface to the commands and encapuslate the details of interaction with the remote API.
@@ -55,25 +60,29 @@ graph TD;
 <!-- designstop -->
 
 ## Installation
+
 <!-- installation -->
- 
+
 ### npm
 
 ```bash
 npm install -g terrac
 ```
+
 <!-- installationstop -->
 
 ## Configuration
+
 <!-- configuration -->
 
 A `terrac.json` file at the module root directory is used to provide configuration for the CLI tool. It contains two objects:
+
 * **backend** to provide the cloud storage configuration
 * **module** to provide the module metadata
 
 The JSON configuration can be populated interactively using the `terrac init` command and this is an example:
 
-``` json
+```json
 {
   "backend": {
     "type": "s3",
@@ -94,63 +103,81 @@ See the [Backends](#backends) section for more details.
 ### Module
 
 The `module` object describes the meta information for the module to publish:
+
 * **name**: module name
 * **version**: module version number. This could be a sematic version or a custom string.
 
 <!-- configurationstop -->
 
 ## Commands
+
 <!-- commands -->
-* [`terrac hello PERSON`](#terrac-hello-person)
 
-## `terrac hello PERSON`
+* [`terrac get`](#terrac-get)
 
-Say hello
+## `terrac get`
 
-```
+Get the module source URL of the given module and version.
+
+```sh
+Get the module source URL of the given module and version.
+
 USAGE
-  $ terrac hello [PERSON] -f <value>
+  $ terrac get NAME [VERSION] [--work-directory <value>] [--overwrite-config <value>]
 
 ARGUMENTS
-  PERSON  Person to say hello to
+  NAME     Module name.
+  VERSION  Module version. It could be omitted, or a complete/short semver.
+           If omitted, it will resolve to the latest version.
+           If a complete semver is given, it will resolve to the exact version.
 
 FLAGS
-  -f, --from=<value>  (required) Who is saying hello
+  --overwrite-config=<value>...  Overwrite terrac configuration
+  --work-directory=<value>       [default: .] Root directory of the module project
 
 DESCRIPTION
-  Say hello
+  Get the module source URL of the given module and version.
 
 EXAMPLES
-  $ oex hello friend --from oclif
-  hello friend from oclif! (./src/commands/hello/index.ts)
+  $ terrac get my-module
+
+  $ terrac get my-module 1.0.3
 ```
 
-_See code: [dist/commands/hello/index.ts](https://github.com/haoliangyu/terrac/blob/v0.0.0/dist/commands/hello/index.ts)_
+_See code: [src/commands/get.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/get.ts)_
 
 <!-- commandsstop -->
 
 ## Backends
+
 <!-- backends -->
 
 <!-- backendsstop -->
 
 ## Limitations
+
 <!-- limitations -->
 
 <!-- limitationsstop -->
 
 ## Roadmap
+
 <!-- roadmap -->
 
 * Features
-  * [ ] Add `overwrite` option to the `publish` command
-  * [ ] Add `init` command to interatively initialize a module project
-  * [ ] Add schema check to the terrac configuration file
-  * [ ] Install with brew
-  * [ ] Install with bash script
+   * [ ] Add `overwrite` option to the `publish` command
+   * [ ] Add `init` command to interatively initialize a module project
+   * [ ] Add schema check to the terrac configuration file
+   * [ ] Add support to any custom version name in the `get` and `publish` commands
+   * [ ] Add support to using partial semver in the `get` and `list` commands
+   * [ ] Install with brew
+   * [ ] Install with bash script
+
 * Backends
-  * [ ] GCP Cloud Storage
-  * [ ] Azure Blob Storage
+   * [ ] GCP Cloud Storage
+   * [ ] Azure Blob Storage
+
 * Maintenance
-  * [ ] Automate release process
+   * [ ] Automate release process
+
 <!-- roadmapstop -->

@@ -1,4 +1,4 @@
-import {IBackend, IModuleListItem} from './factory'
+import {IBackend, IModuleListItem, IModuleSource} from './factory'
 import {expandVersion} from '../utils'
 import {IModuleMeta} from '../types/module'
 import {ModuleAlreadyExistsError, ModuleNotFoundError} from '../errors'
@@ -45,7 +45,7 @@ export class BackendLocalDirectory implements IBackend {
     await this.saveMeta(name, meta)
   }
 
-  public async getSourceUrl(name: string, version?: string): Promise<string> {
+  public async getSource(name: string, version?: string): Promise<IModuleSource> {
     let targetVersion = version
 
     if (!targetVersion) {
@@ -59,7 +59,10 @@ export class BackendLocalDirectory implements IBackend {
       throw new ModuleNotFoundError()
     }
 
-    return path
+    return {
+      version: targetVersion,
+      value: path,
+    }
   }
 
   public async list(name?: string): Promise<IModuleListItem[]> {

@@ -1,29 +1,35 @@
+import {EOL} from 'node:os'
 import {Args, Flags, Command} from '@oclif/core'
 
-import {loadConfig, parseConfigOverwrites} from '../utils'
+import {loadConfig, parseConfigOverwrites, printKV} from '../utils'
 import {BackendFactory} from '../backends/factory'
 
 export default class Get extends Command {
-  static description = 'Get the downloadable URL for the module package'
+  static description = 'Get the module source URL of the given module and version.'
 
   static examples = [
-    '<%= config.bin %> <%= command.id %>',
+    '<%= config.bin %> <%= command.id %> my-module',
+    '<%= config.bin %> <%= command.id %> my-module 1.2.3',
   ]
 
   static args = {
     name: Args.string({
-      description: 'Module name',
+      description: 'Module name.',
       required: true,
     }),
     version: Args.string({
-      description: 'Module version',
+      description: [
+        'Module version. It could be omitted, or a complete semver.',
+        'If omitted, it will resolve to the latest version.',
+        'If a complete semver is given, it will resolve to the exact version.',
+      ].join(EOL),
       required: false,
     }),
   }
 
   static flags = {
     'work-directory': Flags.string({
-      summary: 'Work directory for the module publication',
+      summary: 'Root directory of the module project',
       default: '.',
     }),
     'overwrite-config': Flags.string({
@@ -40,8 +46,8 @@ export default class Get extends Command {
     const config = await loadConfig(workDir, parseConfigOverwrites(flags['overwrite-config']))
 
     const backend = BackendFactory.create(config.backend)
-    const url = await backend.getSourceUrl(name, version)
+    const source = await backend.getSource(name, version)
 
-    this.log(url)
+    this.log(printKV(source))
   }
 }

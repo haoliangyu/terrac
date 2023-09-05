@@ -8,12 +8,17 @@ export type IModuleListItem = {
   version?: string
 }
 
+export type IModuleSource = {
+  version: string
+  value: string
+}
+
 export interface IBackend {
   publish: (name: string, version: string, packagePath: string) => Promise<void>
 
   list: (name?: string) => Promise<IModuleListItem[]>
 
-  getSourceUrl: (name: string, version?: string) => Promise<string>
+  getSource: (name: string, version?: string) => Promise<IModuleSource>
 }
 
 export class BackendFactory {

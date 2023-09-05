@@ -38,7 +38,7 @@ describe('backends/s3', () => {
 
   describe('getSourceUrl', () => {
     test
-    .it('should get the download URL of the latest version by default', async () => {
+    .it('should get the source of the latest version by default', async () => {
       const meta: IModuleMeta = {
         name: 'test-get-source-url',
         version: '1.2.4',
@@ -66,12 +66,13 @@ describe('backends/s3', () => {
         region: 'us-east-1',
       })
 
-      const output = await backend.getSourceUrl('test-get-source-url')
-      expect(output).to.include(`s3::https://s3-us-east-1.amazonaws.com/${bucket}/test-get-source-url/1.2.4/module.zip`)
+      const source = await backend.getSource('test-get-source-url')
+      expect(source.version).to.equal('1.2.4')
+      expect(source.value).to.equal(`s3::https://s3-us-east-1.amazonaws.com/${bucket}/test-get-source-url/1.2.4/module.zip`)
     })
 
     test
-    .it('should get the download URL of a specific version', async () => {
+    .it('should get the source of a specific version', async () => {
       const name = 'test-get-source-url-specific'
       const meta: IModuleMeta = {
         name,
@@ -100,8 +101,9 @@ describe('backends/s3', () => {
         region: 'us-east-1',
       })
 
-      const output = await backend.getSourceUrl(name, '1.2.3')
-      expect(output).to.include(`s3::https://s3-us-east-1.amazonaws.com/${bucket}/${name}/1.2.3/module.zip`)
+      const source = await backend.getSource(name, '1.2.3')
+      expect(source.version).to.equal('1.2.3')
+      expect(source.value).to.equal(`s3::https://s3-us-east-1.amazonaws.com/${bucket}/${name}/1.2.3/module.zip`)
     })
   })
 

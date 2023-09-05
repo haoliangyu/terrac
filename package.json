@@ -79,5 +79,9 @@
   "keywords": [
     "oclif"
   ],
-  "types": "dist/index.d.ts"
+  "types": "dist/index.d.ts",
+  "volta": {
+    "node": "20.5.1",
+    "npm": "9.8.0"
+  }
 }

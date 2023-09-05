@@ -31,9 +31,9 @@ describe('backends/local-directory', () => {
     })
   })
 
-  describe('getSourceUrl', () => {
+  describe('getSource', () => {
     test
-    .it('should get the download URL of the latest version by default', async () => {
+    .it('should get the source of the latest version by default', async () => {
       const localDirPath = `${localDirPrefix}-${Date.now()}`
       const meta: IModuleMeta = {
         name: 'test-module',
@@ -61,12 +61,13 @@ describe('backends/local-directory', () => {
         path: localDirPath,
       })
 
-      const url = await backend.getSourceUrl('test-module')
-      expect(url).to.include(`${localDirPath}/test-module/1.2.4/module.zip`)
+      const source = await backend.getSource('test-module')
+      expect(source.version).to.equal('1.2.4')
+      expect(source.value).to.equal(`${localDirPath}/test-module/1.2.4/module.zip`)
     })
 
     test
-    .it('should get the download URL of a specific version', async () => {
+    .it('should get the dource of a specific version', async () => {
       const localDirPath = `${localDirPrefix}-${Date.now()}`
       const meta: IModuleMeta = {
         name: 'test-module',
@@ -94,8 +95,9 @@ describe('backends/local-directory', () => {
         path: localDirPath,
       })
 
-      const url = await backend.getSourceUrl('test-module', '1.2.3')
-      expect(url).to.include(`${localDirPath}/test-module/1.2.3/module.zip`)
+      const source = await backend.getSource('test-module', '1.2.3')
+      expect(source.version).to.equal('1.2.3')
+      expect(source.value).to.equal(`${localDirPath}/test-module/1.2.3/module.zip`)
     })
   })
 

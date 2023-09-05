@@ -4,6 +4,7 @@ export AWS_ACCESS_KEY_ID=test
 export AWS_SECRET_ACCESS_KEY=test
 
 # make sure localstack is running
+docker pull localstack/localstack
 localstack start -d
 
 # make sure test bucket exists
