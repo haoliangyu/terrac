@@ -115,6 +115,7 @@ The `module` object describes the meta information for the module to publish:
 
 * [`terrac get`](#terrac-get)
 * [`terrac list`](#terrac-list)
+* [`terrac publish`](#terrac-publish)
 
 ## `terrac get`
 
