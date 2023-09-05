@@ -8,13 +8,13 @@ docker pull localstack/localstack
 localstack start -d
 
 # make sure test bucket exists
-awslocal s3api create-bucket --bucket $TEST_BUCKET
+aws --endpoint-url=$TERRAC_BACKEND_S3_ENDPOINT s3api create-bucket --bucket $TEST_BUCKET
 
 # clean up all test objects
-awslocal s3 rm s3://$TEST_BUCKET --recursive
+aws --endpoint-url=$TERRAC_BACKEND_S3_ENDPOINT s3 rm s3://$TEST_BUCKET --recursive
 
 # run tests
 npx mocha --forbid-only "test/backends/s3.test.ts"
 
 # clean up all test objects
-awslocal s3 rm s3://$TEST_BUCKET --recursive
+aws --endpoint-url=$TERRAC_BACKEND_S3_ENDPOINT s3 rm s3://$TEST_BUCKET --recursive

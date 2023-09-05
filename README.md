@@ -16,6 +16,7 @@ A simple CLI tool to quickly setup a minimal private terraform module registry w
 * [Backends](#backends)
 * [Limitations](#limitations)
 * [Roadmap](#roadmap)
+* [Development](#development)
 
 <!-- tocstop -->
 
@@ -228,3 +229,9 @@ _See code: [src/commands/publish.ts](https://github.com/haoliangyu/terrac/blob/m
    * [ ] Automate release process
 
 <!-- roadmapstop -->
+
+## Development
+
+<!-- development -->
+
+<!-- developmentstop -->
