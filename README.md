@@ -114,14 +114,13 @@ The `module` object describes the meta information for the module to publish:
 <!-- commands -->
 
 * [`terrac get`](#terrac-get)
+* [`terrac list`](#terrac-list)
 
 ## `terrac get`
 
 Get the module source URL of the given module and version.
 
 ```sh
-Get the module source URL of the given module and version.
-
 USAGE
   $ terrac get NAME [VERSION] [--work-directory <value>] [--overwrite-config <value>]
 
@@ -145,6 +144,32 @@ EXAMPLES
 ```
 
 _See code: [src/commands/get.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/get.ts)_
+
+## `terrac list`
+
+List available modules and versions.
+
+```sh
+USAGE
+  $ terrac list [NAME] [--work-directory <value>] [--overwrite-config <value>]
+
+ARGUMENTS
+  NAME  Module name
+
+FLAGS
+  --overwrite-config=<value>...  Overwrite terrac configuration
+  --work-directory=<value>       [default: .] Work directory for the module publication
+
+DESCRIPTION
+  List available modules and versions.
+
+EXAMPLES
+  $ terrac list
+
+  $ terrac list my-module
+```
+
+_See code: [src/commands/list.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/list.ts)_
 
 <!-- commandsstop -->
 

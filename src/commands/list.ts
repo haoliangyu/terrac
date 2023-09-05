@@ -4,10 +4,11 @@ import {loadConfig, parseConfigOverwrites} from '../utils'
 import {BackendFactory} from '../backends/factory'
 
 export default class List extends Command {
-  static description = 'List specific modules and versions in the registry,'
+  static description = 'List available modules and versions.'
 
   static examples = [
     '<%= config.bin %> <%= command.id %>',
+    '<%= config.bin %> <%= command.id %> my-module',
   ]
 
   static args = {
