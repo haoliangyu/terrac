@@ -171,6 +171,27 @@ EXAMPLES
 
 _See code: [src/commands/list.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/list.ts)_
 
+## `terrac publish`
+
+Publish a terraform module.
+
+```sh
+USAGE
+  $ terrac publish [--overwrite-config <value>] [--work-directory <value>]
+
+FLAGS
+  --overwrite-config=<value>...  Overwrite terrac configuration
+  --work-directory=<value>       [default: .] Work directory for the module publication
+
+DESCRIPTION
+  Publish a terraform module
+
+EXAMPLES
+  $ terrac publish
+```
+
+_See code: [src/commands/publish.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/publish.ts)_
+
 <!-- commandsstop -->
 
 ## Backends
