@@ -209,7 +209,7 @@ To specify a backend for module publication, use the `backend` block in the `ter
 
 The `local-directory` backend type uses a local directory for artifact storage.
 
-``` json
+``` jsonc
 // terrac.json
 {
   "backend": {
@@ -224,7 +224,7 @@ The `local-directory` backend type uses a local directory for artifact storage.
 
 The `s3` backend type uses an S3 bucket for artifact storage. It uses the AWS SDK for JavaScript to communicate with AWS and requires proper authentication setup (see [documentation](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html)).
 
-``` json
+``` jsonc
 // terrac.json
 {
   "backend": {
