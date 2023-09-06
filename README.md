@@ -200,11 +200,58 @@ _See code: [src/commands/publish.ts](https://github.com/haoliangyu/terrac/blob/m
 
 <!-- backends -->
 
+Terrac supports a variety of storage backends for artifact hosting:
+* Local directory
+* AWS S3
+
+To specify a backend for module publication, use the `backend` block in the `terrac.json` configuration file.
+### Local Directory
+
+The `local-directory` backend type uses a local directory for artifact storage.
+
+``` json
+// terrac.json
+{
+  "backend": {
+    "type": "local-directory",
+    // path to the storage directory
+    "path": "./"
+  }
+}
+```
+
+### AWS S3
+
+The `s3` backend type uses an S3 bucket for artifact storage. It uses the AWS SDK for JavaScript to communicate with AWS and requires proper authentication setup (see [documentation](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html)).
+
+``` json
+// terrac.json
+{
+  "backend": {
+    "type": "s3",
+    // bucket name
+    "bucket": "module-bucket",
+    // bucket region
+    "region": "us-east-1"
+  }
+}
+```
+
 <!-- backendsstop -->
 
 ## Limitations
 
 <!-- limitations -->
+
+The purpose of `terrac` is to provide a consistent and simple interface for terraform module hosting with different storage backends. It focuses on the artifcat publication and retrieval. It doesn't provide many advanced features of modern artifact registry, such as:
+* Authentication
+* High availability
+* High scalability
+* Atomic write
+* Conflict control
+* Permission control
+
+It may be possible to configure a storage backend for these features but this is out of the scope of this tool.
 
 <!-- limitationsstop -->
 
@@ -233,5 +280,9 @@ _See code: [src/commands/publish.ts](https://github.com/haoliangyu/terrac/blob/m
 ## Development
 
 <!-- development -->
+
+In order to run tests locally, it requires the following packages to be installed:
+* [localstack](https://github.com/localstack/localstack#installation)
+* [awscli-local](https://github.com/localstack/awscli-local)
 
 <!-- developmentstop -->
