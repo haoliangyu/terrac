@@ -1,7 +1,7 @@
 import {IBackend, IModuleListItem, IModuleSource} from './factory'
 import {expandVersion} from '../utils'
 import {IModuleMeta} from '../types/module'
-import {ModuleAlreadyExistsError, ModuleNotFoundError} from '../errors'
+import {ModuleNotFoundError} from '../errors'
 
 import {createReadStream} from 'fs-extra'
 import {uniq} from 'lodash'
@@ -41,10 +41,6 @@ export class BackendS3 implements IBackend {
   }
 
   public async publish(name: string, version: string, packagePath: string): Promise<void> {
-    if (await this.keyExists(this.getPackageKey(name, version))) {
-      throw new ModuleAlreadyExistsError()
-    }
-
     const newPackageKeys = expandVersion(version).map(versionPart => this.getPackageKey(name, versionPart))
     const uploadTasks = newPackageKeys.map(key => this.putObject(key, createReadStream(packagePath)))
 
@@ -111,6 +107,11 @@ export class BackendS3 implements IBackend {
     }
 
     return moduleList
+  }
+
+  public async exists(name: string, version?: string): Promise<boolean> {
+    const key = version ? this.getPackageKey(name, version) : this.getMetaKey(name)
+    return this.keyExists(key)
   }
 
   private async getMeta(name: string): Promise<IModuleMeta> {

@@ -18,6 +18,8 @@ export interface IBackend {
 
   list: (name?: string) => Promise<IModuleListItem[]>
 
+  exists: (name: string, version?: string) => Promise<boolean>
+
   getSource: (name: string, version?: string) => Promise<IModuleSource>
 }
 

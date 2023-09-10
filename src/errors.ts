@@ -1,9 +1,9 @@
 export class ModuleAlreadyExistsError extends Error {
-  constructor() {
+  constructor(name: string, version?: string) {
     super()
 
     this.name = 'ModuleAlreadyExists'
-    this.message = 'This module and version already exist in the given backend.'
+    this.message = version ? `The version "${version}" for the module "${name}" already exists.` : `The module "${name}" already exists.`
   }
 }
 

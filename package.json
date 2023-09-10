@@ -23,7 +23,6 @@
     "fs-extra": "^11.1.0",
     "lodash": "^4.17.21",
     "semver": "^7.5.4",
-    "simple-git": "^3.16.0",
     "zip-a-folder": "^1.1.5"
   },
   "devDependencies": {

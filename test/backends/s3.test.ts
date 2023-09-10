@@ -36,7 +36,7 @@ describe('backends/s3', () => {
     })
   })
 
-  describe('getSourceUrl', () => {
+  describe('getSource', () => {
     test
     .it('should get the source of the latest version by default', async () => {
       const meta: IModuleMeta = {
@@ -179,6 +179,103 @@ describe('backends/s3', () => {
 
       const versions = results.map(result => result.version)
       expect(versions.sort()).to.deep.equal(['1.2.3', '1.2.4'])
+    })
+  })
+
+  describe('exists', () => {
+    test
+    .it('should return true if the module is found', async () => {
+      const moduleName = 'test-exists-1'
+      const meta: IModuleMeta = {
+        name: moduleName,
+        version: '1.2.4',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.4',
+            updated: Date.now(),
+          },
+        ],
+      }
+
+      await putObject(s3, bucket, `${moduleName}/meta.json`, meta)
+      await putObject(s3, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
+
+      const backend = new BackendS3({
+        type: 's3',
+        bucket,
+        region: 'us-east-1',
+      })
+
+      expect(await backend.exists(moduleName)).to.equal(true)
+    })
+
+    test
+    .it('should return true if the module version is found', async () => {
+      const moduleName = 'test-exists-2'
+      const meta: IModuleMeta = {
+        name: moduleName,
+        version: '1.2.4',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.4',
+            updated: Date.now(),
+          },
+        ],
+      }
+
+      await putObject(s3, bucket, `${moduleName}/meta.json`, meta)
+      await putObject(s3, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
+
+      const backend = new BackendS3({
+        type: 's3',
+        bucket,
+        region: 'us-east-1',
+      })
+
+      expect(await backend.exists(moduleName, '1.2.4')).to.equal(true)
+    })
+
+    test
+    .it('should return false if the module is not found', async () => {
+      const backend = new BackendS3({
+        type: 's3',
+        bucket,
+        region: 'us-east-1',
+      })
+
+      expect(await backend.exists('not-found')).to.equal(false)
+    })
+
+    test
+    .it('should return true if the module version is found', async () => {
+      const moduleName = 'test-exists-4'
+      const meta: IModuleMeta = {
+        name: moduleName,
+        version: '1.2.4',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.4',
+            updated: Date.now(),
+          },
+        ],
+      }
+
+      await putObject(s3, bucket, `${moduleName}/meta.json`, meta)
+      await putObject(s3, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
+
+      const backend = new BackendS3({
+        type: 's3',
+        bucket,
+        region: 'us-east-1',
+      })
+
+      expect(await backend.exists(moduleName, '1.2.5')).to.equal(false)
     })
   })
 })

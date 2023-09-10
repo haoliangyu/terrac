@@ -139,4 +139,98 @@ describe('backends/local-directory', () => {
       expect(versions.sort()).to.deep.equal(['1.2.3', '1.2.4'])
     })
   })
+
+  describe('exists', () => {
+    test
+    .it('should return true if the module is found', async () => {
+      const localDirPath = `${localDirPrefix}-${Date.now()}`
+      const meta: IModuleMeta = {
+        name: 'test-module',
+        version: '1.2.3',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.3',
+            updated: Date.now(),
+          },
+        ],
+      }
+
+      await outputJson(`${localDirPath}/test-module/meta.json`, meta)
+      await outputFile(`${localDirPath}/test-module/1.2.3/module.zip`, 'test')
+
+      const backend = new BackendLocalDirectory({
+        type: 'local-directory',
+        path: localDirPath,
+      })
+
+      expect(await backend.exists('test-module')).to.equal(true)
+    })
+
+    test
+    .it('should return true if the module version is found', async () => {
+      const localDirPath = `${localDirPrefix}-${Date.now()}`
+      const meta: IModuleMeta = {
+        name: 'test-module',
+        version: '1.2.3',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.3',
+            updated: Date.now(),
+          },
+        ],
+      }
+
+      await outputJson(`${localDirPath}/test-module/meta.json`, meta)
+      await outputFile(`${localDirPath}/test-module/1.2.3/module.zip`, 'test')
+
+      const backend = new BackendLocalDirectory({
+        type: 'local-directory',
+        path: localDirPath,
+      })
+
+      expect(await backend.exists('test-module', '1.2.3')).to.equal(true)
+    })
+
+    test
+    .it('should return false if the module is not found', async () => {
+      const localDirPath = `${localDirPrefix}-${Date.now()}`
+      const backend = new BackendLocalDirectory({
+        type: 'local-directory',
+        path: localDirPath,
+      })
+
+      expect(await backend.exists('test-module')).to.equal(false)
+    })
+
+    test
+    .it('should return true if the module version is found', async () => {
+      const localDirPath = `${localDirPrefix}-${Date.now()}`
+      const meta: IModuleMeta = {
+        name: 'test-module',
+        version: '1.2.3',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.3',
+            updated: Date.now(),
+          },
+        ],
+      }
+
+      await outputJson(`${localDirPath}/test-module/meta.json`, meta)
+      await outputFile(`${localDirPath}/test-module/1.2.3/module.zip`, 'test')
+
+      const backend = new BackendLocalDirectory({
+        type: 'local-directory',
+        path: localDirPath,
+      })
+
+      expect(await backend.exists('test-module', '1.2.4')).to.equal(false)
+    })
+  })
 })

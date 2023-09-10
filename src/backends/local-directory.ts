@@ -1,7 +1,7 @@
 import {IBackend, IModuleListItem, IModuleSource} from './factory'
 import {expandVersion} from '../utils'
 import {IModuleMeta} from '../types/module'
-import {ModuleAlreadyExistsError, ModuleNotFoundError} from '../errors'
+import {ModuleNotFoundError} from '../errors'
 
 import {copy, pathExists, readJson, writeJson, readdir} from 'fs-extra'
 
@@ -24,10 +24,6 @@ export class BackendLocalDirectory implements IBackend {
   }
 
   public async publish(name: string, version: string, packagePath: string): Promise<void> {
-    if (await pathExists(this.getPackagePath(name, version))) {
-      throw new ModuleAlreadyExistsError()
-    }
-
     const newPackagePaths = expandVersion(version).map(versionPart => this.getPackagePath(name, versionPart))
     const tasks = newPackagePaths.map(dest => copy(packagePath, dest))
 
@@ -93,6 +89,11 @@ export class BackendLocalDirectory implements IBackend {
     }
 
     return moduleList
+  }
+
+  public async exists(name: string, version?: string): Promise<boolean> {
+    const path = version ? this.getPackagePath(name, version) : this.getMetaPath(name)
+    return pathExists(path)
   }
 
   private async getMeta(name: string): Promise<IModuleMeta> {

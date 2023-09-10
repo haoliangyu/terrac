@@ -260,7 +260,7 @@ It may be possible to configure a storage backend for these features but this is
 <!-- roadmap -->
 
 * Features
-   * [ ] Add `overwrite` option to the `publish` command
+   * [x] Add `overwrite` option to the `publish` command
    * [ ] Add `init` command to interatively initialize a module project
    * [ ] Add schema check to the terrac configuration file
    * [ ] Add support to any custom version name in the `get` and `publish` commands
