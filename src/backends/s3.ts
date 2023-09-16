@@ -1,5 +1,4 @@
 import {IBackend, IModuleListItem, IModuleSource} from './factory'
-import {expandVersion} from '../utils'
 import {IModuleMeta} from '../types/module'
 import {ModuleNotFoundError} from '../errors'
 
@@ -41,14 +40,12 @@ export class BackendS3 implements IBackend {
   }
 
   public async publish(name: string, version: string, packagePath: string): Promise<void> {
-    const newPackageKeys = expandVersion(version).map(versionPart => this.getPackageKey(name, versionPart))
-    const uploadTasks = newPackageKeys.map(key => this.putObject(key, createReadStream(packagePath)))
-
-    await Promise.all(uploadTasks)
+    await this.putObject(this.getPackageKey(name, version), createReadStream(packagePath))
 
     const meta = await this.getMeta(name)
     const updated = Date.now()
 
+    meta.version = version
     meta.updated = updated
     meta.releases.push({
       version,

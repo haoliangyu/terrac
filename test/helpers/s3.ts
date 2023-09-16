@@ -1,4 +1,4 @@
-import {S3Client, ListObjectsV2Command, ListObjectsV2CommandOutput, PutObjectCommand, DeleteObjectsCommand} from '@aws-sdk/client-s3'
+import {S3Client, ListObjectsV2Command, ListObjectsV2CommandOutput, PutObjectCommand, DeleteObjectsCommand, GetObjectCommand} from '@aws-sdk/client-s3'
 
 export async function keyExists(client: S3Client, bucket: string, key: string): Promise<boolean> {
   const listCommand = new ListObjectsV2Command({
@@ -19,6 +19,16 @@ export async function putObject(client: S3Client, bucket: string, key: string, d
   })
 
   await client.send(putCommand)
+}
+
+export async function getObject(client: S3Client, bucket: string, key: string): Promise<any> {
+  const getCommand = new GetObjectCommand({
+    Bucket: bucket,
+    Key: key,
+  })
+  const response = await client.send(getCommand) as any
+  const data = await response.Body.transformToString()
+  return JSON.parse(data)
 }
 
 export async function purge(client: S3Client, bucket: string): Promise<void> {

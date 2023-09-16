@@ -3,7 +3,7 @@ import {tmpdir} from 'node:os'
 import {unlink} from 'fs-extra'
 import {zip} from 'zip-a-folder'
 
-import {loadConfig, parseConfigOverwrites} from '../utils'
+import {loadConfig, parseConfigOverwrites, isSemver, expandSemver} from '../utils'
 import {BackendFactory} from '../backends/factory'
 import {ModuleAlreadyExistsError} from '../errors'
 
@@ -46,7 +46,21 @@ export default class Publish extends Command {
       throw new ModuleAlreadyExistsError(name, version)
     }
 
-    await backend.publish(name, version, zipPath)
+    // always update latest
+    const versions = ['latest']
+
+    if (isSemver(version)) {
+      versions.push(...expandSemver(version))
+    } else {
+      versions.push(version)
+    }
+
+    for (const value of versions) {
+      // Do NOT assume the backend can support concurrent write
+      // eslint-disable-next-line no-await-in-loop
+      await backend.publish(name, value, zipPath)
+    }
+
     await unlink(zipPath)
   }
 }

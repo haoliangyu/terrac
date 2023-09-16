@@ -1,5 +1,4 @@
 import {IBackend, IModuleListItem, IModuleSource} from './factory'
-import {expandVersion} from '../utils'
 import {IModuleMeta} from '../types/module'
 import {ModuleNotFoundError} from '../errors'
 
@@ -24,15 +23,13 @@ export class BackendLocalDirectory implements IBackend {
   }
 
   public async publish(name: string, version: string, packagePath: string): Promise<void> {
-    const newPackagePaths = expandVersion(version).map(versionPart => this.getPackagePath(name, versionPart))
-    const tasks = newPackagePaths.map(dest => copy(packagePath, dest))
-
-    await Promise.all(tasks)
+    await copy(packagePath, this.getPackagePath(name, version))
 
     const meta = await this.getMeta(name)
     const updated = Date.now()
 
     meta.updated = updated
+    meta.version = version
     meta.releases.push({
       version,
       updated,
@@ -104,7 +101,7 @@ export class BackendLocalDirectory implements IBackend {
     }
 
     const meta: IModuleMeta = {
-      name: name,
+      name,
       version: '0.0.0',
       created: Date.now(),
       updated: Date.now(),

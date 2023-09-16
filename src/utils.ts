@@ -21,19 +21,23 @@ export async function loadConfig(rootDir: string, overwrites: { [key: string]: s
   return result
 }
 
-export function expandVersion(version: string): string[] {
+export function isSemver(version: string): boolean {
+  return version.match(/(\d+)\.(\d+)\.(\d+)/) !== null
+}
+
+export function expandSemver(version: string): string[] {
   const versions = []
   const checkSemver = version.match(/(\d+)\.(\d+)\.(\d+)/)
 
-  if (checkSemver) {
-    versions.push(
-      checkSemver[1],
-      `${checkSemver[1]}.${checkSemver[2]}`,
-      version,
-    )
-  } else {
-    versions.push(version)
+  if (!checkSemver) {
+    throw new Error(`The version "${version}" is not a semver.`)
   }
+
+  versions.push(
+    checkSemver[1],
+    `${checkSemver[1]}.${checkSemver[2]}`,
+    version,
+  )
 
   return versions
 }
