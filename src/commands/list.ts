@@ -1,7 +1,14 @@
 import {Args, Flags, Command} from '@oclif/core'
 import {gt} from 'semver'
-import {loadConfig, parseConfigOverwrites} from '../utils'
+import * as Joi from 'joi'
+
+import {loadConfig, parseConfigOverwrites, backendConfigSchema, moduleConfigSchema, validateConfig} from '../utils'
 import {BackendFactory} from '../backends/factory'
+
+const requiredConfigSchema = Joi.object({
+  backend: backendConfigSchema.required(),
+  module: moduleConfigSchema.optional(),
+})
 
 export default class List extends Command {
   static description = 'List available modules and versions.'
@@ -35,6 +42,8 @@ export default class List extends Command {
     const {name} = args
     const workDir = flags['work-directory']
     const config = await loadConfig(workDir, parseConfigOverwrites(flags['overwrite-config']))
+
+    await validateConfig(requiredConfigSchema, config)
 
     const backend = BackendFactory.create(config.backend)
     const modules = await backend.list(name)

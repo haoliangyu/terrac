@@ -2,8 +2,13 @@ import {IBackend, IModuleListItem, IModuleSource} from './factory'
 import {IModuleMeta} from '../types/module'
 import {ModuleNotFoundError} from '../errors'
 
+import * as Joi from 'joi'
 import {copy, pathExists, readJson, writeJson, readdir} from 'fs-extra'
 
+export const configSchema = Joi.object({
+  type: Joi.string().allow('local-directory').required(),
+  path: Joi.string().required(),
+})
 export interface IBackendConfigLocalDirectory {
   /**
    * Backend type

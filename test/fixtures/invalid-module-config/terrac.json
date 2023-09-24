@@ -1,0 +1,9 @@
+{
+  "backend": {
+    "type": "local-directory",
+    "path": "./test"
+  },
+  "module": {
+    "version": "1.2.3"
+  }
+}

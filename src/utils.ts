@@ -1,8 +1,24 @@
 import {EOL} from 'node:os'
 import {readJson} from 'fs-extra'
 import {set} from 'lodash'
+import * as Joi from 'joi'
 
 import {IProjectConfig} from './types/project'
+
+export {configSchema as backendConfigSchema} from './backends/factory'
+
+export const moduleConfigSchema = Joi.object({
+  name: Joi.string().pattern(/^[\dA-Za-z-]+$/).required(),
+  version: Joi.string().pattern(/^[\d.a-z-]+$/).required(),
+})
+
+export async function validateConfig(schema: Joi.Schema, config: IProjectConfig): Promise<void> {
+  try {
+    await schema.validateAsync(config)
+  } catch (error) {
+    throw new Error(`Terrac configuration is invalid. ${(error as Error).message}`)
+  }
+}
 
 export async function loadConfig(rootDir: string, overwrites: { [key: string]: string } = {}): Promise<IProjectConfig> {
   const config = await readJson(`${rootDir}/terrac.json`)

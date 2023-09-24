@@ -118,4 +118,14 @@ describe('commands/publish', () => {
   .it('should not throw an error if the version already exists but the overwrite option is set', (ctx: any) => {
     expect(ctx.stderr).to.not.include('ModuleAlreadyExists')
   })
+
+  test
+  .stderr()
+  .command([
+    'publish',
+    '--work-directory',
+    'test/fixtures/invalid-module-config',
+  ])
+  .catch('Terrac configuration is invalid. "module.name" is required')
+  .it('should throw an error if the terrac configuration is invalid')
 })

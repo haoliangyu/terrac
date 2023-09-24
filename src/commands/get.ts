@@ -1,9 +1,14 @@
 import {EOL} from 'node:os'
 import {Args, Flags, Command} from '@oclif/core'
+import * as Joi from 'joi'
 
-import {loadConfig, parseConfigOverwrites, printKV} from '../utils'
+import {loadConfig, parseConfigOverwrites, printKV, backendConfigSchema, moduleConfigSchema, validateConfig} from '../utils'
 import {BackendFactory} from '../backends/factory'
 
+const requiredConfigSchema = Joi.object({
+  backend: backendConfigSchema.required(),
+  module: moduleConfigSchema.optional(),
+})
 export default class Get extends Command {
   static description = 'Get the module source URL of the given module and version.'
 
@@ -44,6 +49,8 @@ export default class Get extends Command {
     const {name, version} = args
     const workDir = flags['work-directory']
     const config = await loadConfig(workDir, parseConfigOverwrites(flags['overwrite-config']))
+
+    await validateConfig(requiredConfigSchema, config)
 
     const backend = BackendFactory.create(config.backend)
     const source = await backend.getSource(name, version)

@@ -5,7 +5,14 @@ import {ModuleNotFoundError} from '../errors'
 import {createReadStream} from 'fs-extra'
 import {uniq} from 'lodash'
 import {S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand, ListObjectsV2Command} from '@aws-sdk/client-s3'
+import * as Joi from 'joi'
 
+export const configSchema = Joi.object({
+  type: Joi.string().allow('s3').required(),
+  bucket: Joi.string().required(),
+  region: Joi.string().pattern(/^(?:[a-z]+-){2}\d+$/).required(),
+  keyPreix: Joi.string().optional(),
+})
 export interface IBackendConfigS3 {
   /**
    * Backend type

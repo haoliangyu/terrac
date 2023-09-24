@@ -112,4 +112,14 @@ describe('commands/list', () => {
     expect(ctx.stdout).to.not.contain('test-module-2')
     expect(ctx.stdout).to.not.contain('1.2.4')
   })
+
+  test
+  .stderr()
+  .command([
+    'list',
+    '--work-directory',
+    'test/fixtures/invalid-backend-config',
+  ])
+  .catch('Terrac configuration is invalid. "backend" does not match any of the allowed types')
+  .it('should throw an error if the terrac configuration is invalid')
 })

@@ -1,5 +1,9 @@
-import {BackendS3, IBackendConfigS3} from './s3'
-import {BackendLocalDirectory, IBackendConfigLocalDirectory} from './local-directory'
+import * as Joi from 'joi'
+
+import {BackendS3, IBackendConfigS3, configSchema as s3ConfigSchema} from './s3'
+import {BackendLocalDirectory, IBackendConfigLocalDirectory, configSchema as localConfigSchema} from './local-directory'
+
+export const configSchema = Joi.alternatives(s3ConfigSchema, localConfigSchema)
 
 export type IBackendConfig = IBackendConfigS3 | IBackendConfigLocalDirectory
 

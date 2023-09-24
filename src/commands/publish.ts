@@ -2,10 +2,16 @@ import {Command, Flags} from '@oclif/core'
 import {tmpdir} from 'node:os'
 import {unlink} from 'fs-extra'
 import {zip} from 'zip-a-folder'
+import * as Joi from 'joi'
 
-import {loadConfig, parseConfigOverwrites, isSemver, expandSemver} from '../utils'
+import {loadConfig, parseConfigOverwrites, isSemver, expandSemver, backendConfigSchema, moduleConfigSchema, validateConfig} from '../utils'
 import {BackendFactory} from '../backends/factory'
 import {ModuleAlreadyExistsError} from '../errors'
+
+const requiredConfigSchema = Joi.object({
+  backend: backendConfigSchema.required(),
+  module: moduleConfigSchema.required(),
+})
 
 export default class Publish extends Command {
   static description = 'Publish a terraform module'
@@ -34,6 +40,8 @@ export default class Publish extends Command {
 
     const workDir = flags['work-directory']
     const config = await loadConfig(workDir, parseConfigOverwrites(flags['overwrite-config']))
+
+    await validateConfig(requiredConfigSchema, config)
 
     const zipPath = `${tmpdir()}/${config.module.name}-${config.module.version}.zip`
     await zip(workDir, zipPath)
