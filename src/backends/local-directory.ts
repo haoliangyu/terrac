@@ -6,8 +6,8 @@ import * as Joi from 'joi'
 import {copy, pathExists, readJson, writeJson, readdir} from 'fs-extra'
 
 export const configSchema = Joi.object({
-  type: Joi.string().allow('local-directory').required(),
-  path: Joi.string().required(),
+  type: Joi.string().allow('local-directory').required().description('Backend type'),
+  path: Joi.string().required().description('Local directory path'),
 })
 export interface IBackendConfigLocalDirectory {
   /**

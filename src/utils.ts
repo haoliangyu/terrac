@@ -1,15 +1,21 @@
-import {EOL} from 'node:os'
-import {readJson} from 'fs-extra'
+import {readJson, writeFile} from 'fs-extra'
 import {set} from 'lodash'
 import * as Joi from 'joi'
 
 import {IProjectConfig} from './types/project'
 
-export {configSchema as backendConfigSchema} from './backends/factory'
+import {configSchema} from './backends/factory'
+
+export const backendConfigSchema = configSchema
 
 export const moduleConfigSchema = Joi.object({
-  name: Joi.string().pattern(/^[\dA-Za-z-]+$/).required(),
-  version: Joi.string().pattern(/^[\d.a-z-]+$/).required(),
+  name: Joi.string().pattern(/^[\dA-Za-z-]+$/).required().description('Module name'),
+  version: Joi.string().pattern(/^[\d.a-z-]+$/).required().description('Module version'),
+})
+
+export const projectConfigSchema = Joi.object({
+  backend: backendConfigSchema.required(),
+  module: moduleConfigSchema.optional(),
 })
 
 export async function validateConfig(schema: Joi.Schema, config: IProjectConfig): Promise<void> {
@@ -35,6 +41,11 @@ export async function loadConfig(rootDir: string, overwrites: { [key: string]: s
   }
 
   return result
+}
+
+export async function saveConfig(rootDir: string, config: IProjectConfig): Promise<void> {
+  await validateConfig(projectConfigSchema, config)
+  await writeFile(`${rootDir}/terrac.json`, JSON.stringify(config, null, 2))
 }
 
 export function isSemver(version: string): boolean {
@@ -67,14 +78,4 @@ export function parseConfigOverwrites(inputs: string[] = []): { [key: string]: s
   }
 
   return overwrites
-}
-
-export function printKV(data: Record<string, string>): string {
-  const lines = []
-
-  for (const [key, value] of Object.entries(data)) {
-    lines.push(`${key}:\t${value}`)
-  }
-
-  return lines.join(EOL)
 }

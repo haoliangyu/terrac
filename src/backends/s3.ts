@@ -8,10 +8,10 @@ import {S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand, ListObj
 import * as Joi from 'joi'
 
 export const configSchema = Joi.object({
-  type: Joi.string().allow('s3').required(),
-  bucket: Joi.string().required(),
-  region: Joi.string().pattern(/^(?:[a-z]+-){2}\d+$/).required(),
-  keyPreix: Joi.string().optional(),
+  type: Joi.string().allow('s3').required().description('Backend type'),
+  bucket: Joi.string().required().description('Bucket name'),
+  region: Joi.string().pattern(/^(?:[a-z]+-){2}\d+$/).required().description('AWS region'),
+  keyPrefix: Joi.string().optional().allow('').description('Object key prefix'),
 })
 export interface IBackendConfigS3 {
   /**

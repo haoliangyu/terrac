@@ -261,7 +261,7 @@ It may be possible to configure a storage backend for these features but this is
 
 * Features
    * [x] Add `overwrite` option to the `publish` command
-   * [ ] Add `init` command to interatively initialize a module project
+   * [x] Add `init` command to interatively initialize a module project
    * [x] Add schema check to the terrac configuration file
    * [x] Add support to any custom version name in the `get` and `publish` commands
    * [ ] Add support to using partial semver in the `get` and `list` commands

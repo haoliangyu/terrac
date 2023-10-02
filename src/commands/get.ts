@@ -2,7 +2,7 @@ import {EOL} from 'node:os'
 import {Args, Flags, Command} from '@oclif/core'
 import * as Joi from 'joi'
 
-import {loadConfig, parseConfigOverwrites, printKV, backendConfigSchema, moduleConfigSchema, validateConfig} from '../utils'
+import {loadConfig, parseConfigOverwrites, backendConfigSchema, moduleConfigSchema, validateConfig} from '../utils'
 import {BackendFactory} from '../backends/factory'
 
 const requiredConfigSchema = Joi.object({
@@ -55,6 +55,6 @@ export default class Get extends Command {
     const backend = BackendFactory.create(config.backend)
     const source = await backend.getSource(name, version)
 
-    this.log(printKV(source))
+    this.logJson(source)
   }
 }

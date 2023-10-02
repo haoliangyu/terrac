@@ -12,5 +12,5 @@ export interface IProjectConfig {
   /**
    * Terraform module information
    */
-  module: IModule
+  module?: IModule
 }

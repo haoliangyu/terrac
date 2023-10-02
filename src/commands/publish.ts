@@ -7,6 +7,7 @@ import * as Joi from 'joi'
 import {loadConfig, parseConfigOverwrites, isSemver, expandSemver, backendConfigSchema, moduleConfigSchema, validateConfig} from '../utils'
 import {BackendFactory} from '../backends/factory'
 import {ModuleAlreadyExistsError} from '../errors'
+import {IModule} from '../types/module'
 
 const requiredConfigSchema = Joi.object({
   backend: backendConfigSchema.required(),
@@ -40,15 +41,16 @@ export default class Publish extends Command {
 
     const workDir = flags['work-directory']
     const config = await loadConfig(workDir, parseConfigOverwrites(flags['overwrite-config']))
+    const module = config.module as IModule
 
     await validateConfig(requiredConfigSchema, config)
 
-    const zipPath = `${tmpdir()}/${config.module.name}-${config.module.version}.zip`
+    const zipPath = `${tmpdir()}/${module.name}-${module.version}.zip`
     await zip(workDir, zipPath)
 
     const backend = BackendFactory.create(config.backend)
-    const name = config.module.name
-    const version = config.module.version
+    const name = module.name
+    const version = module.version
 
     if ((await backend.exists(name, version)) && !flags.overwrite) {
       throw new ModuleAlreadyExistsError(name, version)

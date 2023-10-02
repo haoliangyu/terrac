@@ -18,6 +18,7 @@
   ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.259.0",
+    "@inquirer/prompts": "^3.1.2",
     "@oclif/core": "^2",
     "@oclif/plugin-help": "^5",
     "fs-extra": "^11.1.0",
