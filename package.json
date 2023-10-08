@@ -44,6 +44,7 @@
     "mocha": "^9",
     "nanoid": "^4.0.2",
     "oclif": "^3",
+    "pkg": "^5.8.1",
     "shx": "^0.3.3",
     "ts-node": "^10.9.1",
     "tslib": "^2.4.1",
@@ -62,6 +63,7 @@
   "scripts": {
     "start": "node bin/dev",
     "build": "shx rm -rf dist && tsc -b",
+    "build:pkg": "shx rm -rf dist-pkg && pkg . --out-path dist-pkg",
     "lint": "eslint . --ext .ts --config .eslintrc",
     "lint:fix": "eslint . --ext .ts --config .eslintrc --fix",
     "postpack": "shx rm -f oclif.manifest.json",
@@ -82,7 +84,7 @@
   ],
   "types": "dist/index.d.ts",
   "volta": {
-    "node": "20.5.1",
-    "npm": "9.8.0"
+    "node": "18.18.0",
+    "npm": "9.8.1"
   }
 }

@@ -267,6 +267,7 @@ It may be possible to configure a storage backend for these features but this is
    * [ ] Add support to using partial semver in the `get` and `list` commands
    * [ ] Install with brew
    * [ ] Install with bash script
+   * [x] Install with standalone executable in different OS
 
 * Backends
    * [ ] GCP Cloud Storage
