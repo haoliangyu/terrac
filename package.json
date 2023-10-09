@@ -1,6 +1,6 @@
 {
   "name": "terrac",
-  "version": "0.0.0",
+  "version": "0.1.0-beta.1",
   "description": "oclif example Hello World CLI",
   "author": "Haoliang Yu @haoliangyu",
   "bin": {
