@@ -10,3 +10,4 @@
 node_modules
 oclif.manifest.json
 tsconfig.tsbuildinfo
+.DS_Store
