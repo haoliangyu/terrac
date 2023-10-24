@@ -119,7 +119,7 @@ The `module` object describes the meta information for the module to publish:
 * [`terrac list`](#terrac-list)
 * [`terrac publish`](#terrac-publish)
 
-## `terrac init`
+### `terrac init`
 
 Initialize terrac configuration in a directory.
 
@@ -139,7 +139,7 @@ EXAMPLES
 
 _See code: [src/commands/init.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/init.ts)_
 
-## `terrac get`
+### `terrac get`
 
 Get the module source URL of the given module and version.
 
@@ -168,7 +168,7 @@ EXAMPLES
 
 _See code: [src/commands/get.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/get.ts)_
 
-## `terrac list`
+### `terrac list`
 
 List available modules and their versions.
 
@@ -194,7 +194,7 @@ EXAMPLES
 
 _See code: [src/commands/list.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/list.ts)_
 
-## `terrac publish`
+### `terrac publish`
 
 Publish a terraform module.
 
