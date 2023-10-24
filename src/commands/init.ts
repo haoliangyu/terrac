@@ -11,7 +11,7 @@ import {IProjectConfig} from '../types/project'
 import {saveConfig} from '../utils'
 
 export default class Init extends Command {
-  static description = 'describe the command here'
+  static description = 'Initialize terrac configuration in a directory.'
 
   static examples = [
     '<%= config.bin %> <%= command.id %>',
@@ -19,7 +19,7 @@ export default class Init extends Command {
 
   static flags = {
     'work-directory': Flags.string({
-      summary: 'Root directory of the module project',
+      summary: 'Root directory of the terraform project',
       default: '.',
     }),
   }

@@ -114,21 +114,40 @@ The `module` object describes the meta information for the module to publish:
 
 <!-- commands -->
 
+* [`terrac init`](#terrac-init)
 * [`terrac get`](#terrac-get)
 * [`terrac list`](#terrac-list)
 * [`terrac publish`](#terrac-publish)
+
+## `terrac init`
+
+Initialize terrac configuration in a directory.
+
+```
+USAGE
+  $ terrac init [--work-directory <value>]
+
+FLAGS
+  --work-directory=<value>  [default: .] Root directory of the terraform project
+
+DESCRIPTION
+  Initialize terrac configuration in a directory.
+
+EXAMPLES
+  $ terrac init
+```
 
 ## `terrac get`
 
 Get the module source URL of the given module and version.
 
-```sh
+```
 USAGE
   $ terrac get NAME [VERSION] [--work-directory <value>] [--overwrite-config <value>]
 
 ARGUMENTS
   NAME     Module name.
-  VERSION  Module version. It could be omitted, or a complete/short semver.
+  VERSION  Module version. It could be omitted, or a complete semver.
            If omitted, it will resolve to the latest version.
            If a complete semver is given, it will resolve to the exact version.
 
@@ -142,16 +161,16 @@ DESCRIPTION
 EXAMPLES
   $ terrac get my-module
 
-  $ terrac get my-module 1.0.3
+  $ terrac get my-module 1.2.3
 ```
 
 _See code: [src/commands/get.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/get.ts)_
 
 ## `terrac list`
 
-List available modules and versions.
+List available modules and their versions.
 
-```sh
+```
 USAGE
   $ terrac list [NAME] [--work-directory <value>] [--overwrite-config <value>]
 
@@ -177,11 +196,12 @@ _See code: [src/commands/list.ts](https://github.com/haoliangyu/terrac/blob/mast
 
 Publish a terraform module.
 
-```sh
+```
 USAGE
-  $ terrac publish [--overwrite-config <value>] [--work-directory <value>]
+  $ terrac publish [--overwrite] [--overwrite-config <value>] [--work-directory <value>]
 
 FLAGS
+  --overwrite                    Overwrite a published version with new artifact
   --overwrite-config=<value>...  Overwrite terrac configuration
   --work-directory=<value>       [default: .] Work directory for the module publication
 
