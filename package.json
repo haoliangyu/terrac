@@ -62,8 +62,8 @@
   },
   "scripts": {
     "start": "node bin/dev",
-    "build": "shx rm -rf dist && tsc -b",
-    "build:pkg": "shx rm -rf dist-pkg && pkg . --out-path dist-pkg",
+    "build": "shx rm -rf dist && shx rm tsconfig.tsbuildinfo && tsc -b",
+    "build:pkg": "npm run build && shx rm -rf dist-pkg && pkg . --out-path dist-pkg",
     "lint": "eslint . --ext .ts --config .eslintrc",
     "lint:fix": "eslint . --ext .ts --config .eslintrc --fix",
     "postpack": "shx rm -f oclif.manifest.json",
