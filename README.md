@@ -137,6 +137,8 @@ EXAMPLES
   $ terrac init
 ```
 
+_See code: [src/commands/init.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/init.ts)_
+
 ## `terrac get`
 
 Get the module source URL of the given module and version.

@@ -67,12 +67,11 @@
     "lint": "eslint . --ext .ts --config .eslintrc",
     "lint:fix": "eslint . --ext .ts --config .eslintrc --fix",
     "postpack": "shx rm -f oclif.manifest.json",
-    "prepack": "npm run build && oclif manifest && oclif readme",
+    "prepack": "npm run build && oclif manifest",
     "test": "concurrently --group \"npm:test:*\"",
     "test:commands": "mocha --forbid-only \"test/commands/*.test.ts\"",
     "test:backends:s3": "bash scripts/test-backend-s3.sh",
     "test:backends:local": "mocha --forbid-only \"test/backends/local-directory.test.ts\"",
-    "version": "oclif readme && git add README.md",
     "prepare": "husky install"
   },
   "engines": {
