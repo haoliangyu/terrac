@@ -1,6 +1,6 @@
 import {expect, test} from '@oclif/test'
 import {tmpdir} from 'node:os'
-import {pathExists, ensureDir, outputFile, outputJson} from 'fs-extra'
+import {pathExists, ensureDir, outputFile, outputJson, readJson} from 'fs-extra'
 
 import {IModuleMeta} from '../../src/types/module'
 
@@ -15,18 +15,25 @@ describe('commands/publish', () => {
   .command([
     'publish',
     '--work-directory',
-    'test/fixtures/basic-module-local-directory',
+    'test/fixtures/basic-module-local',
     '--overwrite-config',
     'module.name=test-publish',
     '--overwrite-config',
     `backend.path=${localDir}`,
   ])
-  .it('should publish a module to a local directory', async () => {
+  .it('should publish a module with semver to a local directory', async () => {
     expect(await pathExists(`${localDir}/test-publish/meta.json`)).to.be.true
     expect(await pathExists(`${localDir}/test-publish/1/module.zip`)).to.be.true
     expect(await pathExists(`${localDir}/test-publish/1.2/module.zip`)).to.be.true
     expect(await pathExists(`${localDir}/test-publish/1.2.3/module.zip`)).to.be.true
     expect(await pathExists(`${localDir}/test-publish/latest/module.zip`)).to.be.true
+
+    const meta = await readJson(`${localDir}/test-publish/meta.json`)
+    expect(meta.version).to.equal('1.2.3')
+    expect(meta.releases.length).to.equal(1)
+
+    const release = meta.releases[0]
+    expect(release.version).to.equal('1.2.3')
   })
 
   test
@@ -37,7 +44,7 @@ describe('commands/publish', () => {
   .command([
     'publish',
     '--work-directory',
-    'test/fixtures/basic-module-local-directory',
+    'test/fixtures/basic-module-local',
     '--overwrite-config',
     'module.name=test-publish-3',
     '--overwrite-config',
@@ -45,7 +52,7 @@ describe('commands/publish', () => {
     '--overwrite-config',
     `backend.path=${localDir}`,
   ])
-  .it('should publish a module to a local directory', async () => {
+  .it('should publish a module with non-semver to a local directory', async () => {
     expect(await pathExists(`${localDir}/test-publish-3/meta.json`)).to.be.true
     expect(await pathExists(`${localDir}/test-publish-3/beta/module.zip`)).to.be.true
     expect(await pathExists(`${localDir}/test-publish-3/latest/module.zip`)).to.be.true
@@ -75,7 +82,7 @@ describe('commands/publish', () => {
   .command([
     'publish',
     '--work-directory',
-    'test/fixtures/basic-module-local-directory',
+    'test/fixtures/basic-module-local',
     '--overwrite-config',
     'module.name=test-publish-2',
     '--overwrite-config',
@@ -109,7 +116,7 @@ describe('commands/publish', () => {
     'publish',
     '--overwrite',
     '--work-directory',
-    'test/fixtures/basic-module-local-directory',
+    'test/fixtures/basic-module-local',
     '--overwrite-config',
     'module.name=test-publish-3',
     '--overwrite-config',

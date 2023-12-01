@@ -68,8 +68,20 @@ export default class Publish extends Command {
     for (const value of versions) {
       // Do NOT assume the backend can support concurrent write
       // eslint-disable-next-line no-await-in-loop
-      await backend.publish(name, value, zipPath)
+      await backend.upload(name, value, zipPath)
     }
+
+    const meta = await backend.getMeta(name)
+    const updated = Date.now()
+
+    meta.version = version
+    meta.updated = updated
+    meta.releases.push({
+      version,
+      updated,
+    })
+
+    await backend.saveMeta(meta)
 
     await unlink(zipPath)
   }

@@ -45,7 +45,7 @@ describe('commands/list', () => {
   .command([
     'list',
     '--work-directory',
-    'test/fixtures/basic-module-local-directory',
+    'test/fixtures/basic-module-local',
     '--overwrite-config',
     `backend.path=${localDirPrefix}-1`,
   ])
@@ -100,7 +100,7 @@ describe('commands/list', () => {
     'list',
     'test-module-1',
     '--work-directory',
-    'test/fixtures/basic-module-local-directory',
+    'test/fixtures/basic-module-local',
     '--overwrite-config',
     `backend.path=${localDirPrefix}-2`,
   ])

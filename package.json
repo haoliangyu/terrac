@@ -18,6 +18,7 @@
   ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.259.0",
+    "@google-cloud/storage": "^7.6.0",
     "@inquirer/prompts": "^3.1.2",
     "@oclif/core": "^2",
     "@oclif/plugin-help": "^5",
@@ -69,9 +70,10 @@
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "npm run build && oclif manifest && oclif readme",
     "test": "concurrently --group \"npm:test:*\"",
+    "test:unit": "mocha --forbid-only \"test/*.test.ts\"",
     "test:commands": "mocha --forbid-only \"test/commands/*.test.ts\"",
     "test:backends:s3": "bash scripts/test-backend-s3.sh",
-    "test:backends:local": "mocha --forbid-only \"test/backends/local-directory.test.ts\"",
+    "test:backends:local": "mocha --forbid-only \"test/backends/local.test.ts\"",
     "version": "oclif readme && git add README.md",
     "prepare": "husky install"
   },

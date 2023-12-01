@@ -1,7 +1,8 @@
 {
   "backend": {
-    "type": "local-directory",
-    "path": "./"
+    "type": "gcp",
+    "bucket": "terrac-test",
+    "projectId": "terrac-test"
   },
   "module": {
     "name": "test-module",

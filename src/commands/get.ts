@@ -2,7 +2,7 @@ import {EOL} from 'node:os'
 import {Args, Flags, Command} from '@oclif/core'
 import * as Joi from 'joi'
 
-import {loadConfig, parseConfigOverwrites, backendConfigSchema, moduleConfigSchema, validateConfig} from '../utils'
+import {loadConfig, parseConfigOverwrites, backendConfigSchema, moduleConfigSchema, validateConfig, resolveVersion} from '../utils'
 import {BackendFactory} from '../backends/factory'
 
 const requiredConfigSchema = Joi.object({
@@ -29,6 +29,7 @@ export default class Get extends Command {
         'If a complete semver is given, it will resolve to the exact version.',
       ].join(EOL),
       required: false,
+      default: 'latest',
     }),
   }
 
@@ -53,8 +54,14 @@ export default class Get extends Command {
     await validateConfig(requiredConfigSchema, config)
 
     const backend = BackendFactory.create(config.backend)
-    const source = await backend.getSource(name, version)
+    const meta = await backend.getMeta(name)
 
-    this.logJson(source)
+    const resolvedVersion = resolveVersion(meta, version)
+    const sourceUrl = await backend.getSourceUrl(name, resolvedVersion)
+
+    this.logJson({
+      version: resolvedVersion,
+      source: sourceUrl,
+    })
   }
 }

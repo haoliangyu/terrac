@@ -1,4 +1,4 @@
-import {IBackend, IModuleListItem, IModuleSource} from './factory'
+import {IBackend, IModuleListItem, getNewMeta} from './shared'
 import {IModuleMeta} from '../types/module'
 import {ModuleNotFoundError} from '../errors'
 
@@ -7,7 +7,7 @@ import {uniq} from 'lodash'
 import {S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand, ListObjectsV2Command} from '@aws-sdk/client-s3'
 import * as Joi from 'joi'
 
-export const configSchema = Joi.object({
+export const configSchemaS3 = Joi.object({
   type: Joi.string().allow('s3').required().description('Backend type'),
   bucket: Joi.string().required().description('Bucket name'),
   region: Joi.string().pattern(/^(?:[a-z]+-){2}\d+$/).required().description('AWS region'),
@@ -46,23 +46,11 @@ export class BackendS3 implements IBackend {
     })
   }
 
-  public async publish(name: string, version: string, packagePath: string): Promise<void> {
+  public async upload(name: string, version: string, packagePath: string): Promise<void> {
     await this.putObject(this.getPackageKey(name, version), createReadStream(packagePath))
-
-    const meta = await this.getMeta(name)
-    const updated = Date.now()
-
-    meta.version = version
-    meta.updated = updated
-    meta.releases.push({
-      version,
-      updated,
-    })
-
-    await this.saveMeta(name, meta)
   }
 
-  public async getSource(name: string, version?: string): Promise<IModuleSource> {
+  public async getSourceUrl(name: string, version?: string): Promise<string> {
     let targetVersion = version
 
     if (!targetVersion) {
@@ -76,10 +64,7 @@ export class BackendS3 implements IBackend {
       throw new ModuleNotFoundError()
     }
 
-    return {
-      version: targetVersion,
-      value: `s3::https://s3-${this.config.region}.amazonaws.com/${this.config.bucket}/${key}`,
-    }
+    return `s3::https://s3-${this.config.region}.amazonaws.com/${this.config.bucket}/${key}`
   }
 
   public async list(name?: string): Promise<IModuleListItem[]> {
@@ -118,7 +103,7 @@ export class BackendS3 implements IBackend {
     return this.keyExists(key)
   }
 
-  private async getMeta(name: string): Promise<IModuleMeta> {
+  public async getMeta(name: string): Promise<IModuleMeta> {
     const bucket = this.config.bucket
     const key = this.getMetaKey(name)
 
@@ -132,19 +117,11 @@ export class BackendS3 implements IBackend {
       return JSON.parse(data) as IModuleMeta
     }
 
-    const meta: IModuleMeta = {
-      name: name,
-      version: '0.0.0',
-      created: Date.now(),
-      updated: Date.now(),
-      releases: [],
-    }
-
-    return meta
+    return getNewMeta(name)
   }
 
-  private async saveMeta(name: string, meta: IModuleMeta): Promise<void> {
-    const metaKey = this.getMetaKey(name)
+  public async saveMeta(meta: IModuleMeta): Promise<void> {
+    const metaKey = this.getMetaKey(meta.name)
     await this.putObject(metaKey, JSON.stringify(meta))
   }
 

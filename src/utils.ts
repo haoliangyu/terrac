@@ -1,9 +1,10 @@
 import {readJson, writeFile} from 'fs-extra'
 import {set} from 'lodash'
 import * as Joi from 'joi'
+import {gt} from 'semver'
 
 import {IProjectConfig} from './types/project'
-
+import {IModuleMeta} from './types/module'
 import {configSchema} from './backends/factory'
 
 export const backendConfigSchema = configSchema
@@ -49,7 +50,7 @@ export async function saveConfig(rootDir: string, config: IProjectConfig): Promi
 }
 
 export function isSemver(version: string): boolean {
-  return version.match(/(\d+)\.(\d+)\.(\d+)/) !== null
+  return version.match(/^(\d+)(\.\d+)?(\.\d+)?$/) !== null
 }
 
 export function expandSemver(version: string): string[] {
@@ -67,6 +68,40 @@ export function expandSemver(version: string): string[] {
   )
 
   return versions
+}
+
+export function resolveVersion(meta: IModuleMeta, target: string): string {
+  const versions = meta.releases.map(release => release.version)
+
+  if (!isSemver(target)) {
+    if (target === 'latest') {
+      return meta.version
+    }
+
+    if (!versions.includes(target)) {
+      throw new Error(`The version ${target} is not found.`)
+    }
+
+    return target
+  }
+
+  let found = '0.0.0'
+
+  for (const version of versions) {
+    if (
+      isSemver(version) &&
+      version.startsWith(target) &&
+      gt(version, found)
+    ) {
+      found = version
+    }
+  }
+
+  if (found === '0.0.0' && meta.version !== '0.0.0') {
+    throw new Error(`The version ${target} cannot be resolved.`)
+  }
+
+  return found
 }
 
 export function parseConfigOverwrites(inputs: string[] = []): { [key: string]: string } {
