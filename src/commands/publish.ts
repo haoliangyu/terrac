@@ -72,14 +72,20 @@ export default class Publish extends Command {
     }
 
     const meta = await backend.getMeta(name)
-    const updated = Date.now()
+    const existingRelease = meta.releases.find(release => release.version === version)
 
-    meta.version = version
+    const updated = Date.now()
     meta.updated = updated
-    meta.releases.push({
-      version,
-      updated,
-    })
+
+    if (flags.overwrite && existingRelease) {
+      existingRelease.updated = updated
+    } else {
+      meta.version = version
+      meta.releases.push({
+        version,
+        updated,
+      })
+    }
 
     await backend.saveMeta(meta)
 

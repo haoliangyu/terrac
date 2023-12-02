@@ -98,12 +98,12 @@ describe('commands/publish', () => {
     const meta: IModuleMeta = {
       name: 'test-publish-3',
       version: '1.2.3',
-      created: Date.now(),
-      updated: Date.now(),
+      created: 1,
+      updated: 1,
       releases: [
         {
           version: '1.2.3',
-          updated: Date.now(),
+          updated: 1,
         },
       ],
     }
@@ -122,8 +122,18 @@ describe('commands/publish', () => {
     '--overwrite-config',
     `backend.path=${localDir}`,
   ])
-  .it('should not throw an error if the version already exists but the overwrite option is set', (ctx: any) => {
+  .it('should not throw an error if the version already exists but the overwrite option is set', async (ctx: any) => {
     expect(ctx.stderr).to.not.include('ModuleAlreadyExists')
+
+    const meta = await readJson(`${localDir}/test-publish-3/meta.json`)
+    expect(meta.version).to.equal('1.2.3')
+    expect(meta.created).to.equal(1)
+    expect(meta.updated).to.not.equal(1)
+    expect(meta.releases.length).to.equal(1)
+
+    const release = meta.releases[0]
+    expect(release.version).to.equal('1.2.3')
+    expect(release.updated).to.equal(meta.updated)
   })
 
   test
