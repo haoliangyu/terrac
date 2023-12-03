@@ -19,20 +19,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npm run test:commands
-
-  backend-local-test:
-    runs-on: ubuntu-latest
-    needs:
-      - unit-test
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: npm
-      - run: npm ci
+      - run: npm run test:unit
       - run: npm run test:backends:local
+      - run: npm run test:commands
+      - run: npm run build
+      - run: npm run build:pkg
 
   backend-s3-test:
     runs-on: ubuntu-latest
@@ -55,3 +46,31 @@ jobs:
           localstack wait -t 30                     # to become ready before timing out
           echo "Startup complete"
       - run: npm run test:backends:s3
+
+  backend-gcp-test:
+    runs-on: ubuntu-latest
+    needs:
+      - unit-test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+      - run: npm ci
+      - run: npm run test:backends:gcp
+
+  automerge-dependabot-pr:
+    if: ${{ github.event_name == 'pull_request' }}
+    needs:
+      - unit-test
+      - backend-s3-test
+      - backend-gcp-test
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: fastify/github-action-merge-dependabot@v3
+        with:
+          target: minor

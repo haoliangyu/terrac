@@ -1,80 +1,34 @@
 import {expect, test} from '@oclif/test'
-import {ensureDir, outputFile, outputJson, readJson, pathExists} from 'fs-extra'
+import {ensureDir, outputFile, outputJson, pathExists} from 'fs-extra'
 import {tmpdir} from 'node:os'
 
-import {BackendLocalDirectory} from '../../src/backends/local-directory'
+import {BackendLocal} from '../../src/backends/local'
 import {IModuleMeta} from '../../src/types/module'
 
 const localDirPrefix = `${tmpdir()}/terrac-test`
 
-describe('backends/local-directory', () => {
-  describe('publish', () => {
+describe('backends/local', () => {
+  describe('upload', () => {
     test
-    .it('should publish a new module to a local directory', async () => {
+    .it('should upload a new module to a local directory', async () => {
       const localDirPath = `${localDirPrefix}-${Date.now()}`
       await ensureDir(localDirPath)
 
-      const backend = new BackendLocalDirectory({
-        type: 'local-directory',
+      const backend = new BackendLocal({
+        type: 'local',
         path: localDirPath,
       })
 
       const packagePath = `${tmpdir()}/terrac-publish-package-${Date.now()}.zip`
       await outputFile(packagePath, 'test')
 
-      await backend.publish('test-publish', '1.2.3', packagePath)
+      await backend.upload('test-publish', '1.2.3', packagePath)
 
-      expect(await pathExists(`${localDirPath}/test-publish/meta.json`)).to.be.true
       expect(await pathExists(`${localDirPath}/test-publish/1.2.3/module.zip`)).to.be.true
-
-      const meta = await readJson(`${localDirPath}/test-publish/meta.json`)
-      expect(meta.name).to.equal('test-publish')
-      expect(meta.version).to.equal('1.2.3')
-      expect(meta.releases[0].version).to.equal('1.2.3')
-    })
-
-    test
-    .it('should publish a new version for an existing module', async () => {
-      const localDirPath = `${localDirPrefix}-${Date.now()}`
-      const moduleName = 'test-publish-module-2'
-      const meta: IModuleMeta = {
-        name: moduleName,
-        version: '1.2.3',
-        created: Date.now(),
-        updated: Date.now(),
-        releases: [
-          {
-            version: '1.2.3',
-            updated: Date.now(),
-          },
-        ],
-      }
-
-      await outputJson(`${localDirPath}/${moduleName}/meta.json`, meta)
-      await outputFile(`${localDirPath}/${moduleName}/1.2.3/module.zip`, 'test')
-
-      const backend = new BackendLocalDirectory({
-        type: 'local-directory',
-        path: localDirPath,
-      })
-
-      const packagePath = `${tmpdir()}/terrac-publish-package-${Date.now()}.zip`
-      await outputFile(packagePath, 'test')
-
-      await backend.publish(moduleName, '1.2.4', packagePath)
-
-      expect(await pathExists(`${localDirPath}/${moduleName}/meta.json`)).to.be.true
-      expect(await pathExists(`${localDirPath}/${moduleName}/1.2.4/module.zip`)).to.be.true
-
-      const updated = await readJson(`${localDirPath}/${moduleName}/meta.json`)
-      expect(updated.version).to.equal('1.2.4')
-      expect(updated.releases.length).to.equal(2)
-      expect(updated.releases[0].version).to.equal('1.2.3')
-      expect(updated.releases[1].version).to.equal('1.2.4')
     })
   })
 
-  describe('getSource', () => {
+  describe('getSourceUrl', () => {
     test
     .it('should get the source of the latest version by default', async () => {
       const localDirPath = `${localDirPrefix}-${Date.now()}`
@@ -99,14 +53,13 @@ describe('backends/local-directory', () => {
       await outputFile(`${localDirPath}/test-module/1.2.3/module.zip`, 'test')
       await outputFile(`${localDirPath}/test-module/1.2.4/module.zip`, 'test')
 
-      const backend = new BackendLocalDirectory({
-        type: 'local-directory',
+      const backend = new BackendLocal({
+        type: 'local',
         path: localDirPath,
       })
 
-      const source = await backend.getSource('test-module')
-      expect(source.version).to.equal('1.2.4')
-      expect(source.value).to.equal(`${localDirPath}/test-module/1.2.4/module.zip`)
+      const url = await backend.getSourceUrl('test-module')
+      expect(url).to.equal(`${localDirPath}/test-module/1.2.4/module.zip`)
     })
 
     test
@@ -133,14 +86,13 @@ describe('backends/local-directory', () => {
       await outputFile(`${localDirPath}/test-module/1.2.3/module.zip`, 'test')
       await outputFile(`${localDirPath}/test-module/1.2.4/module.zip`, 'test')
 
-      const backend = new BackendLocalDirectory({
-        type: 'local-directory',
+      const backend = new BackendLocal({
+        type: 'local',
         path: localDirPath,
       })
 
-      const source = await backend.getSource('test-module', '1.2.3')
-      expect(source.version).to.equal('1.2.3')
-      expect(source.value).to.equal(`${localDirPath}/test-module/1.2.3/module.zip`)
+      const url = await backend.getSourceUrl('test-module', '1.2.3')
+      expect(url).to.equal(`${localDirPath}/test-module/1.2.3/module.zip`)
     })
   })
 
@@ -151,8 +103,8 @@ describe('backends/local-directory', () => {
       await outputFile(`${localDirPath}/test-module-1/1.2.3/module.zip`, 'test')
       await outputFile(`${localDirPath}/test-module-2/1.2.4/module.zip`, 'test')
 
-      const backend = new BackendLocalDirectory({
-        type: 'local-directory',
+      const backend = new BackendLocal({
+        type: 'local',
         path: localDirPath,
       })
 
@@ -168,8 +120,8 @@ describe('backends/local-directory', () => {
       await outputFile(`${localDirPath}/test-module-1/1.2.4/module.zip`, 'test')
       await outputFile(`${localDirPath}/test-module-2/1.2.5/module.zip`, 'test')
 
-      const backend = new BackendLocalDirectory({
-        type: 'local-directory',
+      const backend = new BackendLocal({
+        type: 'local',
         path: localDirPath,
       })
 
@@ -203,8 +155,8 @@ describe('backends/local-directory', () => {
       await outputJson(`${localDirPath}/test-module/meta.json`, meta)
       await outputFile(`${localDirPath}/test-module/1.2.3/module.zip`, 'test')
 
-      const backend = new BackendLocalDirectory({
-        type: 'local-directory',
+      const backend = new BackendLocal({
+        type: 'local',
         path: localDirPath,
       })
 
@@ -230,8 +182,8 @@ describe('backends/local-directory', () => {
       await outputJson(`${localDirPath}/test-module/meta.json`, meta)
       await outputFile(`${localDirPath}/test-module/1.2.3/module.zip`, 'test')
 
-      const backend = new BackendLocalDirectory({
-        type: 'local-directory',
+      const backend = new BackendLocal({
+        type: 'local',
         path: localDirPath,
       })
 
@@ -241,8 +193,8 @@ describe('backends/local-directory', () => {
     test
     .it('should return false if the module is not found', async () => {
       const localDirPath = `${localDirPrefix}-${Date.now()}`
-      const backend = new BackendLocalDirectory({
-        type: 'local-directory',
+      const backend = new BackendLocal({
+        type: 'local',
         path: localDirPath,
       })
 
@@ -268,12 +220,68 @@ describe('backends/local-directory', () => {
       await outputJson(`${localDirPath}/test-module/meta.json`, meta)
       await outputFile(`${localDirPath}/test-module/1.2.3/module.zip`, 'test')
 
-      const backend = new BackendLocalDirectory({
-        type: 'local-directory',
+      const backend = new BackendLocal({
+        type: 'local',
         path: localDirPath,
       })
 
       expect(await backend.exists('test-module', '1.2.4')).to.equal(false)
+    })
+  })
+
+  describe('getMeta', () => {
+    test
+    .it('should get the module metadata', async () => {
+      const localDirPath = `${localDirPrefix}-${Date.now()}`
+      const meta = {
+        name: 'test-module',
+        version: '1.2.3',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.3',
+            updated: Date.now(),
+          },
+        ],
+      }
+
+      await outputJson(`${localDirPath}/test-module/meta.json`, meta)
+
+      const backend = new BackendLocal({
+        type: 'local',
+        path: localDirPath,
+      })
+
+      expect(await backend.getMeta('test-module')).to.deep.equal(meta)
+    })
+  })
+
+  describe('saveMeta', () => {
+    test
+    .it('should save modified metadata', async () => {
+      const localDirPath = `${localDirPrefix}-${Date.now()}`
+      const meta = {
+        name: 'test-module',
+        version: '1.2.3',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.3',
+            updated: Date.now(),
+          },
+        ],
+      }
+
+      const backend = new BackendLocal({
+        type: 'local',
+        path: localDirPath,
+      })
+
+      await backend.saveMeta(meta)
+
+      expect(await pathExists(`${localDirPath}/test-module/meta.json`)).to.equal(true)
     })
   })
 })

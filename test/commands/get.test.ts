@@ -32,7 +32,7 @@ describe('commands/get', () => {
     'get',
     'test-module',
     '--work-directory',
-    'test/fixtures/basic-module-local-directory',
+    'test/fixtures/basic-module-local',
     '--overwrite-config',
     `backend.path=${localDirPrefix}-1`,
   ])
@@ -70,7 +70,7 @@ describe('commands/get', () => {
     'test-module',
     '1.2.3',
     '--work-directory',
-    'test/fixtures/basic-module-local-directory',
+    'test/fixtures/basic-module-local',
     '--overwrite-config',
     `backend.path=${localDirPrefix}-2`,
   ])

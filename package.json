@@ -18,6 +18,7 @@
   ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.259.0",
+    "@google-cloud/storage": "^7.6.0",
     "@inquirer/prompts": "^3.1.2",
     "@oclif/core": "^2",
     "@oclif/plugin-help": "^5",
@@ -62,16 +63,18 @@
   },
   "scripts": {
     "start": "node bin/dev",
-    "build": "shx rm -rf dist && shx rm tsconfig.tsbuildinfo && tsc -b",
+    "build": "shx rm -rf dist && shx rm -f tsconfig.tsbuildinfo && tsc -b",
     "build:pkg": "npm run build && shx rm -rf dist-pkg && pkg . --out-path dist-pkg",
     "lint": "eslint . --ext .ts --config .eslintrc",
     "lint:fix": "eslint . --ext .ts --config .eslintrc --fix",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "npm run build && oclif manifest",
     "test": "concurrently --group \"npm:test:*\"",
+    "test:unit": "mocha --forbid-only \"test/*.test.ts\"",
     "test:commands": "mocha --forbid-only \"test/commands/*.test.ts\"",
+    "test:backends:gcp": "bash scripts/test-backend-gcp/run.sh",
     "test:backends:s3": "bash scripts/test-backend-s3.sh",
-    "test:backends:local": "mocha --forbid-only \"test/backends/local-directory.test.ts\"",
+    "test:backends:local": "mocha --forbid-only \"test/backends/local.test.ts\"",
     "prepare": "husky install"
   },
   "engines": {

@@ -1,40 +1,56 @@
 import {expect, test} from '@oclif/test'
-import {S3Client} from '@aws-sdk/client-s3'
+import {Storage} from '@google-cloud/storage'
 import {outputFile} from 'fs-extra'
 import {tmpdir} from 'node:os'
 
-import {keyExists, putObject, purge} from '../helpers/s3'
-import {BackendS3} from '../../src/backends/s3'
+import {exists, upload, purge} from '../helpers/gcp'
+import {BackendGCP} from '../../src/backends/gcp'
 import {IModuleMeta} from '../../src/types/module'
 
-const s3 = new S3Client({
-  endpoint: process.env.TERRAC_BACKEND_S3_ENDPOINT,
-  region: 'us-east-1',
+const projectId = process.env.TEST_PROJECT_ID as string
+const apiEndpoint = process.env.TERRAC_BACKEND_GCP_API_ENDPOINT
+const client = new Storage({
+  apiEndpoint,
+  projectId,
 })
 
 const bucket = process.env.TEST_BUCKET as string
 
-describe('backends/s3', () => {
+describe('backends/gcp', () => {
   describe('upload', () => {
+    let backend: BackendGCP
+
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
+
     test
     .it('should upload a module', async () => {
-      const backend = new BackendS3({
-        type: 's3',
-        bucket,
-        region: 'us-east-1',
-      })
-
       const packagePath = `${tmpdir()}/terrac-publish-package-${Date.now()}.zip`
       const moduleName = 'test-publish'
       await outputFile(packagePath, 'test')
 
       await backend.upload(moduleName, '1.2.3', packagePath)
 
-      expect(await keyExists(s3, bucket, `${moduleName}/1.2.3/module.zip`)).to.be.true
+      expect(await exists(client, bucket, `${moduleName}/1.2.3/module.zip`)).to.be.true
     })
   })
 
   describe('getSourceUrl', () => {
+    let backend: BackendGCP
+
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
+
     test
     .it('should get the source of the latest version by default', async () => {
       const meta: IModuleMeta = {
@@ -54,18 +70,12 @@ describe('backends/s3', () => {
         ],
       }
 
-      await putObject(s3, bucket, 'test-get-source-url/meta.json', meta)
-      await putObject(s3, bucket, 'test-get-source-url/1.2.3/module.zip', 'test')
-      await putObject(s3, bucket, 'test-get-source-url/1.2.4/module.zip', 'test')
-
-      const backend = new BackendS3({
-        type: 's3',
-        bucket,
-        region: 'us-east-1',
-      })
+      await upload(client, bucket, 'test-get-source-url/meta.json', meta)
+      await upload(client, bucket, 'test-get-source-url/1.2.3/module.zip', 'test')
+      await upload(client, bucket, 'test-get-source-url/1.2.4/module.zip', 'test')
 
       const url = await backend.getSourceUrl('test-get-source-url')
-      expect(url).to.equal(`s3::https://s3-us-east-1.amazonaws.com/${bucket}/test-get-source-url/1.2.4/module.zip`)
+      expect(url).to.equal(`gcs::${apiEndpoint}/storage/v1/${bucket}/test-get-source-url/1.2.4/module.zip`)
     })
 
     test
@@ -88,35 +98,35 @@ describe('backends/s3', () => {
         ],
       }
 
-      await putObject(s3, bucket, `${name}/meta.json`, meta)
-      await putObject(s3, bucket, `${name}/1.2.3/module.zip`, 'test')
-      await putObject(s3, bucket, `${name}/1.2.4/module.zip`, 'test')
-
-      const backend = new BackendS3({
-        type: 's3',
-        bucket,
-        region: 'us-east-1',
-      })
+      await upload(client, bucket, `${name}/meta.json`, meta)
+      await upload(client, bucket, `${name}/1.2.3/module.zip`, 'test')
+      await upload(client, bucket, `${name}/1.2.4/module.zip`, 'test')
 
       const url = await backend.getSourceUrl(name, '1.2.3')
-      expect(url).to.equal(`s3::https://s3-us-east-1.amazonaws.com/${bucket}/${name}/1.2.3/module.zip`)
+      expect(url).to.equal(`gcs::${apiEndpoint}/storage/v1/${bucket}/${name}/1.2.3/module.zip`)
     })
   })
 
   describe('list', () => {
+    let backend: BackendGCP
+
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
+
+    beforeEach(async () => {
+      await purge(client, bucket)
+    })
+
     test
     .it('should list all modules by default', async () => {
-      await purge(s3, bucket)
-
       const namePrefix = 'test-list-modules'
-      await putObject(s3, bucket, `${namePrefix}-1/1.2.3/module.zip`, 'test')
-      await putObject(s3, bucket, `${namePrefix}-2/1.2.4/module.zip`, 'test')
-
-      const backend = new BackendS3({
-        type: 's3',
-        bucket,
-        region: 'us-east-1',
-      })
+      await upload(client, bucket, `${namePrefix}-1/1.2.3/module.zip`, 'test')
+      await upload(client, bucket, `${namePrefix}-2/1.2.4/module.zip`, 'test')
 
       const results = await backend.list()
       const modules = results.map(result => result.name)
@@ -125,11 +135,9 @@ describe('backends/s3', () => {
 
     test
     .it('should list all versions with a given module name', async () => {
-      await purge(s3, bucket)
-
       const namePrefix = 'test-list-module-versions'
 
-      await putObject(s3, bucket, `${namePrefix}-1/meta.json`, {
+      await upload(client, bucket, `${namePrefix}-1/meta.json`, {
         name: `${namePrefix}-1`,
         version: '1.2.4',
         created: Date.now(),
@@ -145,10 +153,10 @@ describe('backends/s3', () => {
           },
         ],
       })
-      await putObject(s3, bucket, `${namePrefix}-1/1.2.3/module.zip`, 'test')
-      await putObject(s3, bucket, `${namePrefix}-1/1.2.4/module.zip`, 'test')
+      await upload(client, bucket, `${namePrefix}-1/1.2.3/module.zip`, 'test')
+      await upload(client, bucket, `${namePrefix}-1/1.2.4/module.zip`, 'test')
 
-      await putObject(s3, bucket, `${namePrefix}-12meta.json`, {
+      await upload(client, bucket, `${namePrefix}-12meta.json`, {
         name: `${namePrefix}-2`,
         version: '1.2.5',
         created: Date.now(),
@@ -160,13 +168,7 @@ describe('backends/s3', () => {
           },
         ],
       })
-      await putObject(s3, bucket, `${namePrefix}-2/1.2.5/module.zip`, 'test')
-
-      const backend = new BackendS3({
-        type: 's3',
-        bucket,
-        region: 'us-east-1',
-      })
+      await upload(client, bucket, `${namePrefix}-2/1.2.5/module.zip`, 'test')
 
       const results = await backend.list(`${namePrefix}-1`)
 
@@ -179,6 +181,16 @@ describe('backends/s3', () => {
   })
 
   describe('exists', () => {
+    let backend: BackendGCP
+
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
+
     test
     .it('should return true if the module is found', async () => {
       const moduleName = 'test-exists-1'
@@ -195,14 +207,8 @@ describe('backends/s3', () => {
         ],
       }
 
-      await putObject(s3, bucket, `${moduleName}/meta.json`, meta)
-      await putObject(s3, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
-
-      const backend = new BackendS3({
-        type: 's3',
-        bucket,
-        region: 'us-east-1',
-      })
+      await upload(client, bucket, `${moduleName}/meta.json`, meta)
+      await upload(client, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
 
       expect(await backend.exists(moduleName)).to.equal(true)
     })
@@ -223,26 +229,14 @@ describe('backends/s3', () => {
         ],
       }
 
-      await putObject(s3, bucket, `${moduleName}/meta.json`, meta)
-      await putObject(s3, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
-
-      const backend = new BackendS3({
-        type: 's3',
-        bucket,
-        region: 'us-east-1',
-      })
+      await upload(client, bucket, `${moduleName}/meta.json`, meta)
+      await upload(client, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
 
       expect(await backend.exists(moduleName, '1.2.4')).to.equal(true)
     })
 
     test
     .it('should return false if the module is not found', async () => {
-      const backend = new BackendS3({
-        type: 's3',
-        bucket,
-        region: 'us-east-1',
-      })
-
       expect(await backend.exists('not-found')).to.equal(false)
     })
 
@@ -262,20 +256,24 @@ describe('backends/s3', () => {
         ],
       }
 
-      await putObject(s3, bucket, `${moduleName}/meta.json`, meta)
-      await putObject(s3, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
-
-      const backend = new BackendS3({
-        type: 's3',
-        bucket,
-        region: 'us-east-1',
-      })
+      await upload(client, bucket, `${moduleName}/meta.json`, meta)
+      await upload(client, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
 
       expect(await backend.exists(moduleName, '1.2.5')).to.equal(false)
     })
   })
 
   describe('getMeta', () => {
+    let backend: BackendGCP
+
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
+
     test
     .it('should get the module metadata', async () => {
       const moduleName = 'test-get-meta-1'
@@ -292,19 +290,23 @@ describe('backends/s3', () => {
         ],
       }
 
-      await putObject(s3, bucket, `${moduleName}/meta.json`, meta)
-
-      const backend = new BackendS3({
-        type: 's3',
-        bucket,
-        region: 'us-east-1',
-      })
+      await upload(client, bucket, `${moduleName}/meta.json`, meta)
 
       expect(await backend.getMeta(moduleName)).to.deep.equal(meta)
     })
   })
 
   describe('saveMeta', () => {
+    let backend: BackendGCP
+
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
+
     test
     .it('should save modified metadata', async () => {
       const moduleName = 'test-save-meta-1'
@@ -321,15 +323,9 @@ describe('backends/s3', () => {
         ],
       }
 
-      const backend = new BackendS3({
-        type: 's3',
-        bucket,
-        region: 'us-east-1',
-      })
-
       await backend.saveMeta(meta)
 
-      expect(await keyExists(s3, bucket, `${moduleName}/meta.json`)).to.equal(true)
+      expect(await exists(client, bucket, `${moduleName}/meta.json`)).to.equal(true)
     })
   })
 })

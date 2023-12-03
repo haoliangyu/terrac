@@ -1,49 +1,39 @@
-import {IBackend, IModuleListItem, IModuleSource} from './factory'
+import {IBackend, IModuleListItem, getNewMeta} from './shared'
 import {IModuleMeta} from '../types/module'
 import {ModuleNotFoundError} from '../errors'
 
 import * as Joi from 'joi'
-import {copy, pathExists, readJson, writeJson, readdir} from 'fs-extra'
+import {copy, pathExists, readJson, writeJson, readdir, ensureDir} from 'fs-extra'
+import {dirname} from 'node:path'
 
-export const configSchema = Joi.object({
-  type: Joi.string().allow('local-directory').required().description('Backend type'),
+export const configSchemaLocal = Joi.object({
+  type: Joi.string().allow('local').required().description('Backend type'),
   path: Joi.string().required().description('Local directory path'),
 })
-export interface IBackendConfigLocalDirectory {
+
+export interface IBackendConfigLocal {
   /**
    * Backend type
    */
-  type: 'local-directory'
+  type: 'local'
   /**
    * Path
    */
   path: string
 }
 
-export class BackendLocalDirectory implements IBackend {
-  config: IBackendConfigLocalDirectory
+export class BackendLocal implements IBackend {
+  config: IBackendConfigLocal
 
-  constructor(config: IBackendConfigLocalDirectory) {
+  constructor(config: IBackendConfigLocal) {
     this.config = config
   }
 
-  public async publish(name: string, version: string, packagePath: string): Promise<void> {
+  public async upload(name: string, version: string, packagePath: string): Promise<void> {
     await copy(packagePath, this.getPackagePath(name, version))
-
-    const meta = await this.getMeta(name)
-    const updated = Date.now()
-
-    meta.updated = updated
-    meta.version = version
-    meta.releases.push({
-      version,
-      updated,
-    })
-
-    await this.saveMeta(name, meta)
   }
 
-  public async getSource(name: string, version?: string): Promise<IModuleSource> {
+  public async getSourceUrl(name: string, version?: string): Promise<string> {
     let targetVersion = version
 
     if (!targetVersion) {
@@ -57,10 +47,7 @@ export class BackendLocalDirectory implements IBackend {
       throw new ModuleNotFoundError()
     }
 
-    return {
-      version: targetVersion,
-      value: path,
-    }
+    return path
   }
 
   public async list(name?: string): Promise<IModuleListItem[]> {
@@ -98,26 +85,19 @@ export class BackendLocalDirectory implements IBackend {
     return pathExists(path)
   }
 
-  private async getMeta(name: string): Promise<IModuleMeta> {
+  public async getMeta(name: string): Promise<IModuleMeta> {
     const path = this.getMetaPath(name)
 
     if (await pathExists(path)) {
       return readJson(path)
     }
 
-    const meta: IModuleMeta = {
-      name,
-      version: '0.0.0',
-      created: Date.now(),
-      updated: Date.now(),
-      releases: [],
-    }
-
-    return meta
+    return getNewMeta(name)
   }
 
-  private async saveMeta(name: string, meta: IModuleMeta): Promise<void> {
-    const path = this.getMetaPath(name)
+  public async saveMeta(meta: IModuleMeta): Promise<void> {
+    const path = this.getMetaPath(meta.name)
+    await ensureDir(dirname(path))
     await writeJson(path, meta)
   }
 
