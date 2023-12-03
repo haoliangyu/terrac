@@ -57,3 +57,18 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test:backends:gcp
+
+  automerge-dependabot-pr:
+    if: ${{ github.event_name == 'pull_request' }}
+    needs:
+      - unit-test
+      - backend-s3-test
+      - backend-gcp-test
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: fastify/github-action-merge-dependabot@v3
+        with:
+          target: minor
