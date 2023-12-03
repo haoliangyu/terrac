@@ -4,6 +4,7 @@ import {input, select, confirm} from '@inquirer/prompts'
 
 import {IBackendConfig} from '../backends/factory'
 import {IBackendConfigS3} from '../backends/s3'
+import {IBackendConfigGCP} from '../backends/gcp'
 
 import {IModule} from '../types/module'
 import {IProjectConfig} from '../types/project'
@@ -37,6 +38,10 @@ export default class Init extends Command {
         {
           name: 'AWS S3',
           value: 's3',
+        },
+        {
+          name: 'GCP Stroage',
+          value: 'gcp',
         },
       ],
     })
@@ -79,9 +84,9 @@ export default class Init extends Command {
   }
 
   private async askForS3Config(): Promise<IBackendConfigS3> {
-    const bucket = await input({message: 'Bucket name'})
-    const region = await input({message: 'AWS region'})
-    const keyPrefix = await input({message: 'Object key prefix'})
+    const bucket = await this.askForInput('Bucket')
+    const region = await this.askForInput('Region')
+    const keyPrefix = await this.askForInput('Object key prefix', true)
 
     return {
       type: 's3',
@@ -89,5 +94,23 @@ export default class Init extends Command {
       region,
       keyPrefix,
     }
+  }
+
+  private async askForGCPConfig(): Promise<IBackendConfigGCP> {
+    const bucket = await this.askForInput('Bucket')
+    const projectId = await this.askForInput('Project')
+    const pathPrefix = await this.askForInput('Object path prefix', true)
+
+    return {
+      type: 'gcp',
+      bucket,
+      projectId,
+      pathPrefix,
+    }
+  }
+
+  private async askForInput(message: string, optional = false) {
+    const inputMessage = optional ? `[Optional] ${message}` : message
+    return input({message: inputMessage})
   }
 }
