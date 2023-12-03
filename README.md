@@ -227,7 +227,8 @@ Terrac supports a variety of storage backends for artifact hosting:
 * AWS S3
 * GCP Storage
 
-To specify a backend for module publication, use the `backend` block in the `terrac.json` configuration file.
+To set a backend for module publication, update the `backend` block in the `terrac.json` configuration file.
+
 ### Local Directory
 
 The `local` backend type uses a local directory for artifact storage.
@@ -314,7 +315,8 @@ It may be possible to configure a storage backend for these features but this is
    * [ ] Azure Blob Storage
 
 * Maintenance
-   * [ ] Automate release process
+  * [ ] Unit tests for `init` command
+  * [ ] Automate release process
 
 <!-- roadmapstop -->
 
