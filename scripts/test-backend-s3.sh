@@ -1,3 +1,7 @@
+if [[ "$CI" == "true" ]]; then
+  set -e
+fi
+
 export TEST_BUCKET=terrac-test
 export TERRAC_BACKEND_S3_ENDPOINT=http://s3.localhost.localstack.cloud:4566
 export AWS_ACCESS_KEY_ID=test
@@ -18,3 +22,6 @@ npx mocha --forbid-only "test/backends/s3.test.ts"
 
 # clean up all test objects
 awslocal s3 rm s3://$TEST_BUCKET --recursive
+
+# stop localstack
+localstack stop

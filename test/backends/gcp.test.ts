@@ -1,321 +1,331 @@
-// import {expect, test} from '@oclif/test'
-// import {S3Client} from '@aws-sdk/client-s3'
-// import {outputFile} from 'fs-extra'
-// import {tmpdir} from 'node:os'
+import {expect, test} from '@oclif/test'
+import {Storage} from '@google-cloud/storage'
+import {outputFile} from 'fs-extra'
+import {tmpdir} from 'node:os'
 
-// import {keyExists, putObject, getObject, purge} from '../helpers/s3'
-// import {BackendS3} from '../../src/backends/s3'
-// import {IModuleMeta} from '../../src/types/module'
+import {exists, upload, purge} from '../helpers/gcp'
+import {BackendGCP} from '../../src/backends/gcp'
+import {IModuleMeta} from '../../src/types/module'
 
-// const s3 = new S3Client({
-//   endpoint: process.env.TERRAC_BACKEND_S3_ENDPOINT,
-//   region: 'us-east-1',
-// })
+const projectId = process.env.TEST_PROJECT_ID as string
+const apiEndpoint = process.env.TERRAC_BACKEND_GCP_API_ENDPOINT
+const client = new Storage({
+  apiEndpoint,
+  projectId,
+})
 
-// const bucket = process.env.TEST_BUCKET as string
+const bucket = process.env.TEST_BUCKET as string
 
-// describe('backends/s3', () => {
-//   describe('publish', () => {
-//     test
-//     .it('should publish a new module', async () => {
-//       const backend = new BackendS3({
-//         type: 's3',
-//         bucket,
-//         region: 'us-east-1',
-//       })
+describe('backends/gcp', () => {
+  describe('upload', () => {
+    let backend: BackendGCP
 
-//       const packagePath = `${tmpdir()}/terrac-publish-package-${Date.now()}.zip`
-//       const moduleName = 'test-publish'
-//       await outputFile(packagePath, 'test')
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
 
-//       await backend.publish(moduleName, '1.2.3', packagePath)
+    test
+    .it('should upload a module', async () => {
+      const packagePath = `${tmpdir()}/terrac-publish-package-${Date.now()}.zip`
+      const moduleName = 'test-publish'
+      await outputFile(packagePath, 'test')
 
-//       expect(await keyExists(s3, bucket, `${moduleName}/meta.json`)).to.be.true
-//       expect(await keyExists(s3, bucket, `${moduleName}/1.2.3/module.zip`)).to.be.true
-//     })
+      await backend.upload(moduleName, '1.2.3', packagePath)
 
-//     test
-//     .it('should publish a new version for an existing module', async () => {
-//       const moduleName = 'test-publish-2'
-//       const meta: IModuleMeta = {
-//         name: moduleName,
-//         version: '1.2.3',
-//         created: Date.now(),
-//         updated: Date.now(),
-//         releases: [
-//           {
-//             version: '1.2.3',
-//             updated: Date.now(),
-//           },
-//         ],
-//       }
+      expect(await exists(client, bucket, `${moduleName}/1.2.3/module.zip`)).to.be.true
+    })
+  })
 
-//       await putObject(s3, bucket, `${moduleName}/meta.json`, meta)
-//       await putObject(s3, bucket, `${moduleName}/1.2.3/module.zip`, 'test')
+  describe('getSourceUrl', () => {
+    let backend: BackendGCP
 
-//       const backend = new BackendS3({
-//         type: 's3',
-//         bucket,
-//         region: 'us-east-1',
-//       })
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
 
-//       const packagePath = `${tmpdir()}/terrac-publish-package-${Date.now()}.zip`
-//       await outputFile(packagePath, 'test')
+    test
+    .it('should get the source of the latest version by default', async () => {
+      const meta: IModuleMeta = {
+        name: 'test-get-source-url',
+        version: '1.2.4',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.4',
+            updated: Date.now(),
+          },
+          {
+            version: '1.2.3',
+            updated: Date.now(),
+          },
+        ],
+      }
 
-//       expect(await keyExists(s3, bucket, `${moduleName}/1.2.4/module.zip`)).to.be.false
+      await upload(client, bucket, 'test-get-source-url/meta.json', meta)
+      await upload(client, bucket, 'test-get-source-url/1.2.3/module.zip', 'test')
+      await upload(client, bucket, 'test-get-source-url/1.2.4/module.zip', 'test')
 
-//       await backend.publish(moduleName, '1.2.4', packagePath)
+      const url = await backend.getSourceUrl('test-get-source-url')
+      expect(url).to.equal(`gcs::${apiEndpoint}/storage/v1/${bucket}/test-get-source-url/1.2.4/module.zip`)
+    })
 
-//       expect(await keyExists(s3, bucket, `${moduleName}/1.2.4/module.zip`)).to.be.true
+    test
+    .it('should get the source of a specific version', async () => {
+      const name = 'test-get-source-url-specific'
+      const meta: IModuleMeta = {
+        name,
+        version: '1.2.4',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.4',
+            updated: Date.now(),
+          },
+          {
+            version: '1.2.3',
+            updated: Date.now(),
+          },
+        ],
+      }
 
-//       const updated = await getObject(s3, bucket, `${moduleName}/meta.json`)
-//       expect(updated.version).to.equal('1.2.4')
-//       expect(updated.releases.length).to.equal(2)
-//       expect(updated.releases[0].version).to.equal('1.2.3')
-//       expect(updated.releases[1].version).to.equal('1.2.4')
-//     })
-//   })
+      await upload(client, bucket, `${name}/meta.json`, meta)
+      await upload(client, bucket, `${name}/1.2.3/module.zip`, 'test')
+      await upload(client, bucket, `${name}/1.2.4/module.zip`, 'test')
 
-//   describe('getSource', () => {
-//     test
-//     .it('should get the source of the latest version by default', async () => {
-//       const meta: IModuleMeta = {
-//         name: 'test-get-source-url',
-//         version: '1.2.4',
-//         created: Date.now(),
-//         updated: Date.now(),
-//         releases: [
-//           {
-//             version: '1.2.4',
-//             updated: Date.now(),
-//           },
-//           {
-//             version: '1.2.3',
-//             updated: Date.now(),
-//           },
-//         ],
-//       }
+      const url = await backend.getSourceUrl(name, '1.2.3')
+      expect(url).to.equal(`gcs::${apiEndpoint}/storage/v1/${bucket}/${name}/1.2.3/module.zip`)
+    })
+  })
 
-//       await putObject(s3, bucket, 'test-get-source-url/meta.json', meta)
-//       await putObject(s3, bucket, 'test-get-source-url/1.2.3/module.zip', 'test')
-//       await putObject(s3, bucket, 'test-get-source-url/1.2.4/module.zip', 'test')
+  describe('list', () => {
+    let backend: BackendGCP
 
-//       const backend = new BackendS3({
-//         type: 's3',
-//         bucket,
-//         region: 'us-east-1',
-//       })
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
 
-//       const source = await backend.getSource('test-get-source-url')
-//       expect(source.version).to.equal('1.2.4')
-//       expect(source.value).to.equal(`s3::https://s3-us-east-1.amazonaws.com/${bucket}/test-get-source-url/1.2.4/module.zip`)
-//     })
+    beforeEach(async () => {
+      await purge(client, bucket)
+    })
 
-//     test
-//     .it('should get the source of a specific version', async () => {
-//       const name = 'test-get-source-url-specific'
-//       const meta: IModuleMeta = {
-//         name,
-//         version: '1.2.4',
-//         created: Date.now(),
-//         updated: Date.now(),
-//         releases: [
-//           {
-//             version: '1.2.4',
-//             updated: Date.now(),
-//           },
-//           {
-//             version: '1.2.3',
-//             updated: Date.now(),
-//           },
-//         ],
-//       }
+    test
+    .it('should list all modules by default', async () => {
+      const namePrefix = 'test-list-modules'
+      await upload(client, bucket, `${namePrefix}-1/1.2.3/module.zip`, 'test')
+      await upload(client, bucket, `${namePrefix}-2/1.2.4/module.zip`, 'test')
 
-//       await putObject(s3, bucket, `${name}/meta.json`, meta)
-//       await putObject(s3, bucket, `${name}/1.2.3/module.zip`, 'test')
-//       await putObject(s3, bucket, `${name}/1.2.4/module.zip`, 'test')
+      const results = await backend.list()
+      const modules = results.map(result => result.name)
+      expect(modules.sort()).to.deep.equal([`${namePrefix}-1`, `${namePrefix}-2`])
+    })
 
-//       const backend = new BackendS3({
-//         type: 's3',
-//         bucket,
-//         region: 'us-east-1',
-//       })
+    test
+    .it('should list all versions with a given module name', async () => {
+      const namePrefix = 'test-list-module-versions'
 
-//       const source = await backend.getSource(name, '1.2.3')
-//       expect(source.version).to.equal('1.2.3')
-//       expect(source.value).to.equal(`s3::https://s3-us-east-1.amazonaws.com/${bucket}/${name}/1.2.3/module.zip`)
-//     })
-//   })
+      await upload(client, bucket, `${namePrefix}-1/meta.json`, {
+        name: `${namePrefix}-1`,
+        version: '1.2.4',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.4',
+            updated: Date.now(),
+          },
+          {
+            version: '1.2.3',
+            updated: Date.now(),
+          },
+        ],
+      })
+      await upload(client, bucket, `${namePrefix}-1/1.2.3/module.zip`, 'test')
+      await upload(client, bucket, `${namePrefix}-1/1.2.4/module.zip`, 'test')
 
-//   describe('list', () => {
-//     test
-//     .it('should list all modules by default', async () => {
-//       await purge(s3, bucket)
+      await upload(client, bucket, `${namePrefix}-12meta.json`, {
+        name: `${namePrefix}-2`,
+        version: '1.2.5',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.5',
+            updated: Date.now(),
+          },
+        ],
+      })
+      await upload(client, bucket, `${namePrefix}-2/1.2.5/module.zip`, 'test')
 
-//       const namePrefix = 'test-list-modules'
-//       await putObject(s3, bucket, `${namePrefix}-1/1.2.3/module.zip`, 'test')
-//       await putObject(s3, bucket, `${namePrefix}-2/1.2.4/module.zip`, 'test')
+      const results = await backend.list(`${namePrefix}-1`)
 
-//       const backend = new BackendS3({
-//         type: 's3',
-//         bucket,
-//         region: 'us-east-1',
-//       })
+      const modules = results.map(result => result.name)
+      expect(modules.sort()).to.deep.equal([`${namePrefix}-1`, `${namePrefix}-1`])
 
-//       const results = await backend.list()
-//       const modules = results.map(result => result.name)
-//       expect(modules.sort()).to.deep.equal([`${namePrefix}-1`, `${namePrefix}-2`])
-//     })
+      const versions = results.map(result => result.version)
+      expect(versions.sort()).to.deep.equal(['1.2.3', '1.2.4'])
+    })
+  })
 
-//     test
-//     .it('should list all versions with a given module name', async () => {
-//       await purge(s3, bucket)
+  describe('exists', () => {
+    let backend: BackendGCP
 
-//       const namePrefix = 'test-list-module-versions'
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
 
-//       await putObject(s3, bucket, `${namePrefix}-1/meta.json`, {
-//         name: `${namePrefix}-1`,
-//         version: '1.2.4',
-//         created: Date.now(),
-//         updated: Date.now(),
-//         releases: [
-//           {
-//             version: '1.2.4',
-//             updated: Date.now(),
-//           },
-//           {
-//             version: '1.2.3',
-//             updated: Date.now(),
-//           },
-//         ],
-//       })
-//       await putObject(s3, bucket, `${namePrefix}-1/1.2.3/module.zip`, 'test')
-//       await putObject(s3, bucket, `${namePrefix}-1/1.2.4/module.zip`, 'test')
+    test
+    .it('should return true if the module is found', async () => {
+      const moduleName = 'test-exists-1'
+      const meta: IModuleMeta = {
+        name: moduleName,
+        version: '1.2.4',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.4',
+            updated: Date.now(),
+          },
+        ],
+      }
 
-//       await putObject(s3, bucket, `${namePrefix}-12meta.json`, {
-//         name: `${namePrefix}-2`,
-//         version: '1.2.5',
-//         created: Date.now(),
-//         updated: Date.now(),
-//         releases: [
-//           {
-//             version: '1.2.5',
-//             updated: Date.now(),
-//           },
-//         ],
-//       })
-//       await putObject(s3, bucket, `${namePrefix}-2/1.2.5/module.zip`, 'test')
+      await upload(client, bucket, `${moduleName}/meta.json`, meta)
+      await upload(client, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
 
-//       const backend = new BackendS3({
-//         type: 's3',
-//         bucket,
-//         region: 'us-east-1',
-//       })
+      expect(await backend.exists(moduleName)).to.equal(true)
+    })
 
-//       const results = await backend.list(`${namePrefix}-1`)
+    test
+    .it('should return true if the module version is found', async () => {
+      const moduleName = 'test-exists-2'
+      const meta: IModuleMeta = {
+        name: moduleName,
+        version: '1.2.4',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.4',
+            updated: Date.now(),
+          },
+        ],
+      }
 
-//       const modules = results.map(result => result.name)
-//       expect(modules.sort()).to.deep.equal([`${namePrefix}-1`, `${namePrefix}-1`])
+      await upload(client, bucket, `${moduleName}/meta.json`, meta)
+      await upload(client, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
 
-//       const versions = results.map(result => result.version)
-//       expect(versions.sort()).to.deep.equal(['1.2.3', '1.2.4'])
-//     })
-//   })
+      expect(await backend.exists(moduleName, '1.2.4')).to.equal(true)
+    })
 
-//   describe('exists', () => {
-//     test
-//     .it('should return true if the module is found', async () => {
-//       const moduleName = 'test-exists-1'
-//       const meta: IModuleMeta = {
-//         name: moduleName,
-//         version: '1.2.4',
-//         created: Date.now(),
-//         updated: Date.now(),
-//         releases: [
-//           {
-//             version: '1.2.4',
-//             updated: Date.now(),
-//           },
-//         ],
-//       }
+    test
+    .it('should return false if the module is not found', async () => {
+      expect(await backend.exists('not-found')).to.equal(false)
+    })
 
-//       await putObject(s3, bucket, `${moduleName}/meta.json`, meta)
-//       await putObject(s3, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
+    test
+    .it('should return true if the module version is found', async () => {
+      const moduleName = 'test-exists-4'
+      const meta: IModuleMeta = {
+        name: moduleName,
+        version: '1.2.4',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.4',
+            updated: Date.now(),
+          },
+        ],
+      }
 
-//       const backend = new BackendS3({
-//         type: 's3',
-//         bucket,
-//         region: 'us-east-1',
-//       })
+      await upload(client, bucket, `${moduleName}/meta.json`, meta)
+      await upload(client, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
 
-//       expect(await backend.exists(moduleName)).to.equal(true)
-//     })
+      expect(await backend.exists(moduleName, '1.2.5')).to.equal(false)
+    })
+  })
 
-//     test
-//     .it('should return true if the module version is found', async () => {
-//       const moduleName = 'test-exists-2'
-//       const meta: IModuleMeta = {
-//         name: moduleName,
-//         version: '1.2.4',
-//         created: Date.now(),
-//         updated: Date.now(),
-//         releases: [
-//           {
-//             version: '1.2.4',
-//             updated: Date.now(),
-//           },
-//         ],
-//       }
+  describe('getMeta', () => {
+    let backend: BackendGCP
 
-//       await putObject(s3, bucket, `${moduleName}/meta.json`, meta)
-//       await putObject(s3, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
 
-//       const backend = new BackendS3({
-//         type: 's3',
-//         bucket,
-//         region: 'us-east-1',
-//       })
+    test
+    .it('should get the module metadata', async () => {
+      const moduleName = 'test-get-meta-1'
+      const meta: IModuleMeta = {
+        name: moduleName,
+        version: '1.2.4',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.4',
+            updated: Date.now(),
+          },
+        ],
+      }
 
-//       expect(await backend.exists(moduleName, '1.2.4')).to.equal(true)
-//     })
+      await upload(client, bucket, `${moduleName}/meta.json`, meta)
 
-//     test
-//     .it('should return false if the module is not found', async () => {
-//       const backend = new BackendS3({
-//         type: 's3',
-//         bucket,
-//         region: 'us-east-1',
-//       })
+      expect(await backend.getMeta(moduleName)).to.deep.equal(meta)
+    })
+  })
 
-//       expect(await backend.exists('not-found')).to.equal(false)
-//     })
+  describe('saveMeta', () => {
+    let backend: BackendGCP
 
-//     test
-//     .it('should return true if the module version is found', async () => {
-//       const moduleName = 'test-exists-4'
-//       const meta: IModuleMeta = {
-//         name: moduleName,
-//         version: '1.2.4',
-//         created: Date.now(),
-//         updated: Date.now(),
-//         releases: [
-//           {
-//             version: '1.2.4',
-//             updated: Date.now(),
-//           },
-//         ],
-//       }
+    beforeEach(() => {
+      backend = new BackendGCP({
+        type: 'gcp',
+        bucket,
+        projectId,
+      })
+    })
 
-//       await putObject(s3, bucket, `${moduleName}/meta.json`, meta)
-//       await putObject(s3, bucket, `${moduleName}/1.2.4/module.zip`, 'test')
+    test
+    .it('should save modified metadata', async () => {
+      const moduleName = 'test-save-meta-1'
+      const meta: IModuleMeta = {
+        name: moduleName,
+        version: '1.2.4',
+        created: Date.now(),
+        updated: Date.now(),
+        releases: [
+          {
+            version: '1.2.4',
+            updated: Date.now(),
+          },
+        ],
+      }
 
-//       const backend = new BackendS3({
-//         type: 's3',
-//         bucket,
-//         region: 'us-east-1',
-//       })
+      await backend.saveMeta(meta)
 
-//       expect(await backend.exists(moduleName, '1.2.5')).to.equal(false)
-//     })
-//   })
-// })
+      expect(await exists(client, bucket, `${moduleName}/meta.json`)).to.equal(true)
+    })
+  })
+})

@@ -290,7 +290,7 @@ It may be possible to configure a storage backend for these features but this is
    * [x] Install with standalone executable in different OS
 
 * Backends
-   * [ ] GCP Cloud Storage
+   * [x] GCP Cloud Storage
    * [ ] Azure Blob Storage
 
 * Maintenance

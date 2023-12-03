@@ -35,10 +35,13 @@ export interface IBackendConfigGCP {
 export class BackendGCP implements IBackend {
   config: IBackendConfigGCP
   client: Storage
+  apiEndpoint: string
 
   constructor(config: IBackendConfigGCP) {
     this.config = config
+    this.apiEndpoint = process.env.TERRAC_BACKEND_GCP_API_ENDPOINT || 'https://www.googleapis.com'
     this.client = new Storage({
+      apiEndpoint: process.env.TERRAC_BACKEND_GCP_API_ENDPOINT,
       projectId: this.config.projectId,
     })
   }
@@ -61,7 +64,7 @@ export class BackendGCP implements IBackend {
       throw new ModuleNotFoundError()
     }
 
-    return `gcs::https://www.googleapis.com/storage/v1/${this.config.bucket}/${path}`
+    return `gcs::${this.apiEndpoint}/storage/v1/${this.config.bucket}/${path}`
   }
 
   public async list(name?: string): Promise<IModuleListItem[]> {
