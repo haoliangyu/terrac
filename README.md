@@ -223,19 +223,20 @@ _See code: [src/commands/publish.ts](https://github.com/haoliangyu/terrac/blob/m
 <!-- backends -->
 
 Terrac supports a variety of storage backends for artifact hosting:
-* Local directory
+* Local
 * AWS S3
+* GCP Storage
 
 To specify a backend for module publication, use the `backend` block in the `terrac.json` configuration file.
 ### Local Directory
 
-The `local-directory` backend type uses a local directory for artifact storage.
+The `local` backend type uses a local directory for artifact storage.
 
 ``` jsonc
 // terrac.json
 {
   "backend": {
-    "type": "local-directory",
+    "type": "local",
     // path to the storage directory
     "path": "./"
   }
@@ -244,7 +245,7 @@ The `local-directory` backend type uses a local directory for artifact storage.
 
 ### AWS S3
 
-The `s3` backend type uses an S3 bucket for artifact storage. It uses the AWS SDK for JavaScript to communicate with AWS and requires proper authentication setup (see [documentation](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html)).
+The `s3` backend type uses an [AWS S3](https://aws.amazon.com/s3/) bucket for artifact storage. It uses the AWS SDK for JavaScript to communicate with AWS and requires proper authentication setup (see [documentation](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html)).
 
 ``` jsonc
 // terrac.json
@@ -255,6 +256,23 @@ The `s3` backend type uses an S3 bucket for artifact storage. It uses the AWS SD
     "bucket": "module-bucket",
     // bucket region
     "region": "us-east-1"
+  }
+}
+```
+
+### GCP Storage
+
+The `gcp` backend type uses a [GCP Storage](https://cloud.google.com/storage) bucket for artifact storage. It uses the GCP Node.js SDK to communicate with GCP and requires proper authentication setup (see [documentation](https://cloud.google.com/docs/authentication/provide-credentials-adc)).
+
+``` jsonc
+// terrac.json
+{
+  "backend": {
+    "type": "gcp",
+    // bucket name
+    "bucket": "module-bucket",
+    // project id
+    "projectId": "my-module-registry"
   }
 }
 ```
