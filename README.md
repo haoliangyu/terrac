@@ -309,10 +309,11 @@ It may be possible to configure a storage backend for these features but this is
    * [ ] Install with brew
    * [ ] Install with bash script
    * [x] Install with standalone executable in different OS
+   * [ ] Use backend configuration schema to configure `init` command questionnaire
 
 * Backends
    * [x] GCP Cloud Storage
-   * [ ] Azure Blob Storage
+   * [x] Azure Blob Storage
 
 * Maintenance
   * [ ] Unit tests for `init` command
