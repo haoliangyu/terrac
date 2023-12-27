@@ -41,9 +41,8 @@ export class BackendAzure implements IBackend {
   constructor(config: IBackendConfigAzure) {
     this.config = config
     this.serviceUrl = process.env.TERRAC_BACKEND_AZURE_SERVICE_URL || `https://${this.config.account}.blob.core.windows.net`
-    const tokenCredential = new DefaultAzureCredential()
 
-    const serviceClient = new BlobServiceClient(this.serviceUrl, tokenCredential)
+    const serviceClient = new BlobServiceClient(this.serviceUrl,  new DefaultAzureCredential())
     this.containerClient = serviceClient.getContainerClient(this.config.container)
   }
 
