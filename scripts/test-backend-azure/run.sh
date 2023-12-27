@@ -14,6 +14,9 @@ export NODE_TLS_REJECT_UNAUTHORIZED=0
 export TERRAC_BACKEND_AZURE_SERVICE_URL=https://localhost:10000/devstoreaccount1
 export TEST_CONTAINER=terrac-test
 export TEST_ACCOUNT=devstoreaccount1
+export AZURE_TENANT_ID=test
+export AZURE_CLIENT_ID=test
+export AZURE_CLIENT_SECRET=test
 npx mocha --forbid-only "test/backends/azure.test.ts"
 
 docker rm -f azurite
