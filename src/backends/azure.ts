@@ -2,7 +2,7 @@ import {IBackend, IModuleListItem, getNewMeta} from './shared'
 import {IModuleMeta} from '../types/module'
 import {ModuleNotFoundError} from '../errors'
 
-import {BlobServiceClient, ContainerClient} from '@azure/storage-blob'
+import {BlobServiceClient, ContainerClient, StorageSharedKeyCredential} from '@azure/storage-blob'
 import {DefaultAzureCredential} from '@azure/identity'
 import {uniq} from 'lodash'
 import * as Joi from 'joi'
@@ -42,7 +42,10 @@ export class BackendAzure implements IBackend {
     this.config = config
     this.serviceUrl = process.env.TERRAC_BACKEND_AZURE_SERVICE_URL || `https://${this.config.account}.blob.core.windows.net`
 
-    const serviceClient = new BlobServiceClient(this.serviceUrl,  new DefaultAzureCredential())
+    const serviceClient = process.env.AZURITE_ACCOUNT_NAME && process.env.AZURITE_ACCOUNT_KEY ?
+      new BlobServiceClient(this.serviceUrl, new StorageSharedKeyCredential(process.env.AZURITE_ACCOUNT_NAME, process.env.AZURITE_ACCOUNT_KEY)) :
+      new BlobServiceClient(this.serviceUrl,  new DefaultAzureCredential())
+
     this.containerClient = serviceClient.getContainerClient(this.config.container)
   }
 

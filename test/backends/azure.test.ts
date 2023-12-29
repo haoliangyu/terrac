@@ -1,6 +1,5 @@
 import {expect, test} from '@oclif/test'
-import {BlobServiceClient} from '@azure/storage-blob'
-import {DefaultAzureCredential} from '@azure/identity'
+import {BlobServiceClient, StorageSharedKeyCredential} from '@azure/storage-blob'
 import {outputFile} from 'fs-extra'
 import {tmpdir} from 'node:os'
 
@@ -9,10 +8,10 @@ import {BackendAzure} from '../../src/backends/azure'
 import {IModuleMeta} from '../../src/types/module'
 
 const serviceUrl = process.env.TERRAC_BACKEND_AZURE_SERVICE_URL as string
-const client = new BlobServiceClient(serviceUrl, new DefaultAzureCredential())
+const client = new BlobServiceClient(serviceUrl, new StorageSharedKeyCredential(process.env.AZURITE_ACCOUNT_NAME as string, process.env.AZURITE_ACCOUNT_KEY as string))
 
 const container = process.env.TEST_CONTAINER as string
-const account = process.env.TEST_ACCOUNT as string
+const account = process.env.AZURITE_ACCOUNT_NAME as string
 
 describe('backends/azure', () => {
   before(async () => {

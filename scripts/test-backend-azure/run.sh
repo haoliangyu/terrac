@@ -12,7 +12,8 @@ docker run -d --name azurite -p 10000:10000 -p 10001:10001 -p 10002:10002 -v ${S
 export NODE_TLS_REJECT_UNAUTHORIZED=0
 export TERRAC_BACKEND_AZURE_SERVICE_URL=https://localhost:10000/devstoreaccount1
 export TEST_CONTAINER=terrac-test
-export TEST_ACCOUNT=devstoreaccount1
+export AZURITE_ACCOUNT_NAME="devstoreaccount1"
+export AZURITE_ACCOUNT_KEY="Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
 npx mocha --forbid-only "test/backends/azure.test.ts"
 
 docker rm -f azurite
