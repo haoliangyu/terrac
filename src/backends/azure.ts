@@ -124,12 +124,12 @@ export class BackendAzure implements IBackend {
 
   private async uploadFile(fileName: string, localFilePath: string): Promise<void> {
     const blockBlobClient = await this.containerClient.getBlockBlobClient(fileName)
-    blockBlobClient.uploadFile(localFilePath)
+    await blockBlobClient.uploadFile(localFilePath)
   }
 
   private async uploadObject(fileName: string, data: any): Promise<void> {
     const blockBlobClient = await this.containerClient.getBlockBlobClient(fileName)
-    blockBlobClient.uploadData(Buffer.from(data))
+    await blockBlobClient.uploadData(Buffer.from(data))
   }
 
   private async fileNameExists(fileName: string): Promise<boolean> {

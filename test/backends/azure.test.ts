@@ -15,6 +15,11 @@ const container = process.env.TEST_CONTAINER as string
 const account = process.env.TEST_ACCOUNT as string
 
 describe('backends/azure', () => {
+  before(async () => {
+    const containerClient = client.getContainerClient(container)
+    await containerClient.createIfNotExists()
+  })
+
   describe('upload', () => {
     let backend: BackendAzure
 

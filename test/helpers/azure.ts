@@ -9,7 +9,7 @@ export async function exists(client: BlobServiceClient, container: string, fileN
 export async function upload(client: BlobServiceClient, container: string, fileName: string, data: any): Promise <void> {
   const containerClient = client.getContainerClient(container)
   const blockBlobClient = await containerClient.getBlockBlobClient(fileName)
-  blockBlobClient.uploadData(Buffer.from(JSON.stringify(data)))
+  await blockBlobClient.uploadData(Buffer.from(JSON.stringify(data)))
 }
 
 export async function purge(client: BlobServiceClient, container: string): Promise<void> {
