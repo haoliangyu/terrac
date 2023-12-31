@@ -261,9 +261,9 @@ The `s3` backend type uses an [AWS S3](https://aws.amazon.com/s3/) bucket for ar
 }
 ```
 
-### GCP Storage
+### GCP Cloud Storage
 
-The `gcp` backend type uses a [GCP Storage](https://cloud.google.com/storage) bucket for artifact storage. It uses the GCP Node.js SDK to communicate with GCP and requires proper authentication setup (see [documentation](https://cloud.google.com/docs/authentication/provide-credentials-adc)).
+The `gcp` backend type uses a [GCP Cloud Storage](https://cloud.google.com/storage) bucket for artifact storage. It uses the GCP Node.js SDK to communicate with GCP and requires proper authentication setup (see [documentation](https://cloud.google.com/docs/authentication/provide-credentials-adc)).
 
 ``` jsonc
 // terrac.json
@@ -274,6 +274,25 @@ The `gcp` backend type uses a [GCP Storage](https://cloud.google.com/storage) bu
     "bucket": "module-bucket",
     // project id
     "projectId": "my-module-registry"
+  }
+}
+```
+
+### Azure Blob Storage
+
+The `azure` backend type uses a [Azure Blog Storage](https://azure.microsoft.com/en-us/products/storage/blobs) container for artifact storage.
+
+``` jsonc
+// terrac.json
+{
+  "backend": {
+    "type": "azure",
+    // Azure storage account name
+    "account": "terrac",
+    // Azure storage container name
+    "conatiner": "terrac-test",
+    // [Optional] File name prefix
+    "fileNamePrefix": "name/prefix"
   }
 }
 ```
