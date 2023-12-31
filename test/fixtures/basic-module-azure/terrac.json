@@ -1,0 +1,11 @@
+{
+  "backend": {
+    "type": "azure",
+    "account": "terractest",
+    "container": "terrac-test"
+  },
+  "module": {
+    "name": "test-module",
+    "version": "1.2.3"
+  }
+}

@@ -5,6 +5,7 @@ import {input, select, confirm} from '@inquirer/prompts'
 import {IBackendConfig} from '../backends/factory'
 import {IBackendConfigS3} from '../backends/s3'
 import {IBackendConfigGCP} from '../backends/gcp'
+import {IBackendConfigAzure} from '../backends/azure'
 
 import {IModule} from '../types/module'
 import {IProjectConfig} from '../types/project'
@@ -78,6 +79,10 @@ export default class Init extends Command {
     switch (type) {
     case 's3':
       return this.askForS3Config()
+    case 'gcp':
+      return this.askForGCPConfig()
+    case 'azure':
+      return this.askForAzureConfig()
     default:
       throw new Error(`Backend type "${type}" is not supported.`)
     }
@@ -106,6 +111,19 @@ export default class Init extends Command {
       bucket,
       projectId,
       pathPrefix,
+    }
+  }
+
+  private async askForAzureConfig(): Promise<IBackendConfigAzure> {
+    const account = await this.askForInput('Account')
+    const container = await this.askForInput('Container')
+    const fileNamePrefix = await this.askForInput('File name prefix', true)
+
+    return {
+      type: 'azure',
+      account,
+      container,
+      fileNamePrefix,
     }
   }
 

@@ -18,6 +18,8 @@
   ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.259.0",
+    "@azure/identity": "^4.0.0",
+    "@azure/storage-blob": "^12.17.0",
     "@google-cloud/storage": "^7.6.0",
     "@inquirer/prompts": "^3.1.2",
     "@oclif/core": "^2",
@@ -73,6 +75,7 @@
     "test:unit": "mocha --forbid-only \"test/*.test.ts\"",
     "test:commands": "mocha --forbid-only \"test/commands/*.test.ts\"",
     "test:backends:gcp": "bash scripts/test-backend-gcp/run.sh",
+    "test:backends:azure": "bash scripts/test-backend-azure/run.sh",
     "test:backends:s3": "bash scripts/test-backend-s3.sh",
     "test:backends:local": "mocha --forbid-only \"test/backends/local.test.ts\"",
     "prepare": "husky install"

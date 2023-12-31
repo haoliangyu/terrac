@@ -11,3 +11,5 @@ node_modules
 oclif.manifest.json
 tsconfig.tsbuildinfo
 .DS_Store
+.env
+scripts/test-backend-azure/data
