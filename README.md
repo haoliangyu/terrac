@@ -325,6 +325,7 @@ It may be possible to configure a storage backend for these features but this is
    * [x] Add schema check to the terrac configuration file
    * [x] Add support to any custom version name in the `get` and `publish` commands
    * [ ] Add support to using partial semver in the `get` and `list` commands
+   * [ ] Add support to [OpenTofu](https://opentofu.org)
    * [ ] Install with brew
    * [ ] Install with bash script
    * [x] Install with standalone executable in different OS
