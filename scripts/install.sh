@@ -24,13 +24,13 @@ os=$(uname -s)
 # Check the operating system and print a message
 if [ "$os" = "Darwin" ]; then
   download_url="https://github.com/haoliangyu/terrac/releases/download/$latest_release/terrac-macos"
-  curl -o "$TMPDIR/terrac" -J -L -H "Accept: application/octet-stream" "$download_url"
-  sudo mv -f $TMPDIR/terrac /usr/local/bin/terrac
+  curl -o "terrac" -J -L -H "Accept: application/octet-stream" "$download_url"
+  sudo mv -f terrac /usr/local/bin/terrac
   sudo chmod +x /usr/local/bin/terrac
 elif [ "$os" = "Linux" ]; then
   download_url="https://github.com/haoliangyu/terrac/releases/download/$latest_release/terrac-linux"
-  curl -o "$TMPDIR/terrac" -J -L -H "Accept: application/octet-stream" "$download_url"
-  sudo mv -f $TMPDIR/terrac /usr/local/bin/terrac
+  curl -o "terrac" -J -L -H "Accept: application/octet-stream" "$download_url"
+  sudo mv -f terrac /usr/local/bin/terrac
   sudo chmod +x /usr/local/bin/terrac
 # Windows support is not added yet
 # elif [ "$os" = "MINGW64_NT-10.0" ]; then
