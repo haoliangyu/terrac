@@ -1,4 +1,4 @@
-name: Main
+name: main
 
 on:
   pull_request:
@@ -95,7 +95,7 @@ jobs:
         os:
           - ubuntu
           - macos
-    runs-on: ${{ matrix }}-os
+    runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v4
       - shell: bash
