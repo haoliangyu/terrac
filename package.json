@@ -1,7 +1,7 @@
 {
   "name": "terrac",
   "version": "0.1.0-beta.1",
-  "description": "oclif example Hello World CLI",
+  "description": "A minimal private module registry for Terraform and OpenTofu",
   "author": "Haoliang Yu @haoliangyu",
   "bin": {
     "terrac": "./bin/run"
@@ -85,7 +85,14 @@
   },
   "bugs": "https://github.com/haoliangyu/terrac/issues",
   "keywords": [
-    "oclif"
+    "cli",
+    "terraform",
+    "opentofu",
+    "module",
+    "private-registry",
+    "s3",
+    "gcp",
+    "azure"
   ],
   "types": "dist/index.d.ts",
   "volta": {
