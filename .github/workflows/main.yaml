@@ -1,4 +1,4 @@
-name: Main
+name: main
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ jobs:
   unit-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -30,7 +30,7 @@ jobs:
     needs:
       - unit-test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -52,7 +52,7 @@ jobs:
     needs:
       - unit-test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -65,7 +65,7 @@ jobs:
     needs:
       - unit-test
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -88,3 +88,17 @@ jobs:
       - uses: fastify/github-action-merge-dependabot@v3
         with:
           target: minor
+
+  install-script-test:
+    strategy:
+      matrix:
+        os:
+          - ubuntu
+          - macos
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        run: |
+          bash scripts/install.sh
+          terrac --help
