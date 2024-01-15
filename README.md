@@ -66,8 +66,18 @@ graph TD;
 
 ### npm
 
+It can be installed with [npm](https://www.npmjs.com) or other compatible package managers, such as [yarn](https://yarnpkg.com) or [pnpm](https://pnpm.io).
+
 ```bash
 npm install -g terrac
+```
+
+### bash
+
+It can be installed directly from a bash script, which does not require the installation of nodejs runtime. The scirpt can be used in both MacOS and Linux.
+
+``` bash
+curl https://raw.githubusercontent.com/haoliangyu/terrac/main/scripts/install.sh | bash
 ```
 
 <!-- installationstop -->
@@ -337,7 +347,8 @@ It may be possible to configure a storage backend for these features but this is
 
 * Maintenance
   * [ ] Unit tests for `init` command
-  * [ ] Automate release process
+  * [ ] Automate release process to cut GitHub release
+  * [ ] Refactor documentation into multiple pages
 
 <!-- roadmapstop -->
 
