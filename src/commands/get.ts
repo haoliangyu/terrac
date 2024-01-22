@@ -35,12 +35,13 @@ export default class Get extends Command {
 
   static flags = {
     'work-directory': Flags.string({
-      summary: 'Root directory of the module project',
+      summary: 'Root directory of the module configuration',
       default: '.',
     }),
     'overwrite-config': Flags.string({
       summary: 'Overwrite terrac configuration',
       multiple: true,
+      hidden: true,
     }),
   }
 

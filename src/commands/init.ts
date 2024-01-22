@@ -21,7 +21,7 @@ export default class Init extends Command {
 
   static flags = {
     'work-directory': Flags.string({
-      summary: 'Root directory of the terraform project',
+      summary: 'Root directory of the module project',
       default: '.',
     }),
   }

@@ -27,12 +27,13 @@ export default class List extends Command {
 
   static flags = {
     'work-directory': Flags.string({
-      summary: 'Work directory for the module publication',
+      summary: 'Root directory of the terrac configuration',
       default: '.',
     }),
     'overwrite-config': Flags.string({
       summary: 'Overwrite terrac configuration',
       multiple: true,
+      hidden: true,
     }),
   }
 

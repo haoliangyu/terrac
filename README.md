@@ -11,6 +11,7 @@ A simple CLI tool to quickly setup a minimal private terraform module registry w
 * [Why](#why)
 * [Design](#design)
 * [Installation](#installation)
+* [Tutorial](#tutorial)
 * [Configuration](#configuration)
 * [Commands](#commands)
 * [Backends](#backends)
@@ -26,14 +27,14 @@ A simple CLI tool to quickly setup a minimal private terraform module registry w
 
 Sharing terraform module privately is usually necessary when the infrastructure development happens across multiple teams (DevOps vs applications) or multiple repositories (core vs. app infrastructure).
 
-While a module can be downloaded from a git URL, it lacks the support to code versionization and storage management. While other paid solutions (like [Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/registry)) or open-source solutions (like [citizen](https://github.com/outsideris/citizen)) exist as a full-feature registry, they are usually overkill for small teams, in terms of const, features, or maintenance.
+While a module can be downloaded from a git URL, it lacks the support to code versionization and storage management. While other paid solutions (like [Terraform Cloud](https://developer.hashicorp.com/terraform/cloud-docs/registry)) or open-source solutions (like [citizen](https://github.com/outsideris/citizen)) exist as a full-feature registry, they are usually very heavy for small teams, in terms of const, features, or maintenance.
 
 The `terrac` CLI provides a thin layer on your choice of cloud storage service, such as [AWS S3](https://aws.amazon.com/s3/) or [GCP Cloud Storage](https://cloud.google.com/storage/), to publish and share private module code.  It provides features:
 
 * Publish and download with [semver](https://semver.org)
 * Manage storage schema and metadata automatically
 * Fully integrated with your infrastructure
-* Completely serverless (no hosting)
+* Completely serverless (nothing is hosted)
 * Simple commands (npm-style)
 * Free and flexible
 
@@ -55,7 +56,11 @@ The desing of `terrac` consists of three components:
 graph TD;
     Configuration-->Command:publish;
     Command:publish-->Backend:s3;
-    Backend:s3-->S3;
+    Command:publish-->Backend:gcp;
+    Command:publish-->Backend:azure;
+    Backend:gcp-->GCP;
+    Backend:azure-->Azure;
+    Backend:s3-->AWS;
 ```
 
 <!-- designstop -->
@@ -66,19 +71,48 @@ graph TD;
 
 ### npm
 
-It can be installed with [npm](https://www.npmjs.com) or other compatible package managers, such as [yarn](https://yarnpkg.com) or [pnpm](https://pnpm.io).
+As a node.js application, terrac can be installed with [npm](https://www.npmjs.com) or other compatible package managers, such as [yarn](https://yarnpkg.com) or [pnpm](https://pnpm.io).
 
 ```bash
 npm install -g terrac
 ```
 
+## manual
+
+Binaries for diefferent platforms are provided as attachment at each [GitHub release](https://github.com/haoliangyu/terrac/releases):
+
+* `terrac-linux` for Linux
+* `terrac-macos` for MacOS
+* `terrac-win.exe` for Windowns
+
+You can simply download a binary and put it in a directoy included in the `PATH` environment variable. Note that administrator permission may be required for the action.
+
 ### bash
 
-It can be installed directly from a bash script, which does not require the installation of nodejs runtime. The scirpt can be used in both MacOS and Linux.
+The following script automates the manual installation with a bash script in Linux and MacOS. `sudo` permission is required.
 
 ``` bash
 curl https://raw.githubusercontent.com/haoliangyu/terrac/main/scripts/install.sh | bash
 ```
+
+<!-- tutorial -->
+
+## Tutorial
+
+To initialize a module directory and publish
+
+``` bash
+# Create terrac configuration
+terrac init
+
+# Pack and publish the module to the remote storage service
+terrac publish
+
+# Get the module source URL to use in terraform
+terrac get module-name
+```
+
+<!-- tutorialstop -->
 
 <!-- installationstop -->
 
@@ -86,7 +120,7 @@ curl https://raw.githubusercontent.com/haoliangyu/terrac/main/scripts/install.sh
 
 <!-- configuration -->
 
-A `terrac.json` file at the module root directory is used to provide configuration for the CLI tool. It contains two objects:
+A `terrac.json` file at the module root directory is used to provide configuration for terrac. It contains two blocks:
 
 * **backend** to provide the cloud storage configuration
 * **module** to provide the module metadata
@@ -116,7 +150,7 @@ See the [Backends](#backends) section for more details.
 The `module` object describes the meta information for the module to publish:
 
 * **name**: module name
-* **version**: module version number. This could be a sematic version or a custom string.
+* **version**: module version number. This could be a sematic version or a custom version name.
 
 <!-- configurationstop -->
 
@@ -142,20 +176,17 @@ FLAGS
 
 DESCRIPTION
   Initialize terrac configuration in a directory.
-
-EXAMPLES
-  $ terrac init
 ```
 
 _See code: [src/commands/init.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/init.ts)_
 
 ### `terrac get`
 
-Get the module source URL of the given module and version.
+Get the module source URL with the given module and version.
 
 ```
 USAGE
-  $ terrac get NAME [VERSION] [--work-directory <value>] [--overwrite-config <value>]
+  $ terrac get NAME [VERSION] [--work-directory <value>]
 
 ARGUMENTS
   NAME     Module name.
@@ -164,8 +195,7 @@ ARGUMENTS
            If a complete semver is given, it will resolve to the exact version.
 
 FLAGS
-  --overwrite-config=<value>...  Overwrite terrac configuration
-  --work-directory=<value>       [default: .] Root directory of the module project
+  --work-directory=<value>       [default: .] Root directory for the terrac configuration file
 
 DESCRIPTION
   Get the module source URL of the given module and version.
@@ -184,14 +214,13 @@ List available modules and their versions.
 
 ```
 USAGE
-  $ terrac list [NAME] [--work-directory <value>] [--overwrite-config <value>]
+  $ terrac list [NAME] [--work-directory <value>]
 
 ARGUMENTS
   NAME  Module name
 
 FLAGS
-  --overwrite-config=<value>...  Overwrite terrac configuration
-  --work-directory=<value>       [default: .] Work directory for the module publication
+  --work-directory=<value>       [default: .] Root directory for the terrac configuration file
 
 DESCRIPTION
   List available modules and versions.
@@ -210,11 +239,10 @@ Publish a terraform module.
 
 ```
 USAGE
-  $ terrac publish [--overwrite] [--overwrite-config <value>] [--work-directory <value>]
+  $ terrac publish [--overwrite] [--work-directory <value>]
 
 FLAGS
-  --overwrite                    Overwrite a published version with new artifact
-  --overwrite-config=<value>...  Overwrite terrac configuration
+  --overwrite                    Overwrite a published version with new package
   --work-directory=<value>       [default: .] Work directory for the module publication
 
 DESCRIPTION
@@ -236,12 +264,13 @@ Terrac supports a variety of storage backends for artifact hosting:
 * Local
 * AWS S3
 * GCP Storage
+* Azure Block Storage
 
 To set a backend for module publication, update the `backend` block in the `terrac.json` configuration file.
 
 ### Local Directory
 
-The `local` backend type uses a local directory for artifact storage.
+The `local` backend type uses a local directory for package storage. It is typically used for local testing.
 
 ``` jsonc
 // terrac.json
@@ -256,7 +285,7 @@ The `local` backend type uses a local directory for artifact storage.
 
 ### AWS S3
 
-The `s3` backend type uses an [AWS S3](https://aws.amazon.com/s3/) bucket for artifact storage. It uses the AWS SDK for JavaScript to communicate with AWS and requires proper authentication setup (see [documentation](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html)).
+The `s3` backend type uses an [AWS S3](https://aws.amazon.com/s3/) bucket for artifact storage. It utilizes the AWS SDK for JavaScript to communicate with AWS and requires proper authentication setup (see [documentation](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html)).
 
 ``` jsonc
 // terrac.json
@@ -313,7 +342,7 @@ The `azure` backend type uses a [Azure Blog Storage](https://azure.microsoft.com
 
 <!-- limitations -->
 
-The purpose of `terrac` is to provide a consistent and simple interface for terraform module hosting with different storage backends. It focuses on the artifcat publication and retrieval. It doesn't provide many advanced features of modern artifact registry, such as:
+The purpose of `terrac` is to provide a consistent and simple interface for terraform module hosting with a variety of storage backends. It focuses on the module publication and download. However, it doesn't provide or guarantee some advanced features of modern artifact registry, such as:
 * Authentication
 * High availability
 * High scalability
@@ -321,7 +350,7 @@ The purpose of `terrac` is to provide a consistent and simple interface for terr
 * Conflict control
 * Permission control
 
-It may be possible to configure a storage backend for these features but this is out of the scope of this tool.
+It may be possible to configure a storage backend for these features but this is out of the scope of this project.
 
 <!-- limitationsstop -->
 
@@ -348,7 +377,6 @@ It may be possible to configure a storage backend for these features but this is
 * Maintenance
   * [ ] Unit tests for `init` command
   * [ ] Automate release process to cut GitHub release
-  * [ ] Refactor documentation into multiple pages
 
 <!-- roadmapstop -->
 

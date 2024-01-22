@@ -23,15 +23,16 @@ export default class Publish extends Command {
 
   static flags = {
     overwrite: Flags.boolean({
-      summary: 'Overwrite a published version with new artifact',
+      summary: 'Overwrite a published version with a new package',
       default: false,
     }),
     'overwrite-config': Flags.string({
       summary: 'Overwrite terrac configuration',
       multiple: true,
+      hidden: true,
     }),
     'work-directory': Flags.string({
-      summary: 'Work directory for the module publication',
+      summary: 'Root directory of the module project',
       default: '.',
     }),
   }
@@ -90,5 +91,8 @@ export default class Publish extends Command {
     await backend.saveMeta(meta)
 
     await unlink(zipPath)
+
+    const sourceUrl = await backend.getSourceUrl(name, version)
+    this.log(`The module is published and available with the source URL: ${sourceUrl}`)
   }
 }
