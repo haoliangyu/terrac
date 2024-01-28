@@ -79,6 +79,85 @@ describe('commands/get', () => {
   })
 
   test
+  .stdout()
+  .do(async () => {
+    const meta: IModuleMeta = {
+      name: 'test-module',
+      version: '1.2.4',
+      created: Date.now(),
+      updated: Date.now(),
+      releases: [
+        {
+          version: '1.2.4',
+          updated: Date.now(),
+        },
+        {
+          version: '1.2.3',
+          updated: Date.now(),
+        },
+      ],
+    }
+
+    // provision local directory for testing
+    await outputJson(`${localDirPrefix}-3/test-module/meta.json`, meta)
+    await outputFile(`${localDirPrefix}-3/test-module/1.2/module.zip`, 'test')
+    await outputFile(`${localDirPrefix}-3/test-module/1.2.3/module.zip`, 'test')
+    await outputFile(`${localDirPrefix}-3/test-module/1.2.4/module.zip`, 'test')
+  })
+  .command([
+    'get',
+    'test-module',
+    '1.2',
+    '--work-directory',
+    'test/fixtures/basic-module-local',
+    '--overwrite-config',
+    `backend.path=${localDirPrefix}-3`,
+  ])
+  .it('should return the source URL with the semver component input', ctx => {
+    expect(ctx.stdout).to.contain(`${localDirPrefix}-3/test-module/1.2/module.zip`)
+  })
+
+  test
+  .stdout()
+  .do(async () => {
+    const meta: IModuleMeta = {
+      name: 'test-module',
+      version: '1.2.4',
+      created: Date.now(),
+      updated: Date.now(),
+      releases: [
+        {
+          version: '1.2.4',
+          updated: Date.now(),
+        },
+        {
+          version: '1.2.3',
+          updated: Date.now(),
+        },
+      ],
+    }
+
+    // provision local directory for testing
+    await outputJson(`${localDirPrefix}-4/test-module/meta.json`, meta)
+    await outputFile(`${localDirPrefix}-4/test-module/1.2/module.zip`, 'test')
+    await outputFile(`${localDirPrefix}-4/test-module/1.2.3/module.zip`, 'test')
+    await outputFile(`${localDirPrefix}-4/test-module/1.2.4/module.zip`, 'test')
+  })
+  .command([
+    'get',
+    'test-module',
+    '1.2',
+    '--exact',
+    '--work-directory',
+    'test/fixtures/basic-module-local',
+    '--overwrite-config',
+    `backend.path=${localDirPrefix}-4`,
+  ])
+  .it('should resolve to the latest in-range version if the exact flag is given', ctx => {
+    expect(ctx.stdout).to.contain(`${localDirPrefix}-4/test-module/1.2.4/module.zip`)
+  })
+
+  test
   .stderr()
   .command([
     'get',

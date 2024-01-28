@@ -186,16 +186,17 @@ Get the module source URL with the given module and version.
 
 ```
 USAGE
-  $ terrac get NAME [VERSION] [--work-directory <value>]
+  $ terrac get NAME [VERSION] [--exact] [--work-directory <value>]
 
 ARGUMENTS
-  NAME     Module name.
-  VERSION  Module version. It could be omitted, or a complete semver.
-           If omitted, it will resolve to the latest version.
-           If a complete semver is given, it will resolve to the exact version.
+  NAME     Module name
+  VERSION  Module version. This could be a version name (like latest), a semver, or a semver component.
+           By default, terrac will verify the release with the input version and generate the source URL.
+           If it needs to resolve to an exact version, use the --exact flag.
 
 FLAGS
-  --work-directory=<value>       [default: .] Root directory for the terrac configuration file
+  --exact                   Whether to resolve to an exact version if a named version or a semver component is given
+  --work-directory=<value>  [default: .] Root directory of the module configuration
 
 DESCRIPTION
   Get the module source URL of the given module and version.
@@ -203,7 +204,21 @@ DESCRIPTION
 EXAMPLES
   $ terrac get my-module
 
-  $ terrac get my-module 1.2.3
+  $ terrac get my-module latest
+
+  $ terrac get my-module 1.3.2
+
+  $ terrac get my-module 1.3
+
+  $ terrac get --exact my-module 1.3
+```
+
+The output URL can be used in the module `source` property. For example,
+
+``` terraform
+module "example" {
+  source = "output_source_url"
+}
 ```
 
 _See code: [src/commands/get.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/get.ts)_
@@ -235,24 +250,30 @@ _See code: [src/commands/list.ts](https://github.com/haoliangyu/terrac/blob/mast
 
 ### `terrac publish`
 
-Publish a terraform module.
+Publish a terraform module using the metadata from the `terrac.json` configuration. If a version name (like `beta`) is specified, it will publish a single release with the version `beta`. If a semver is specified, it will publish multile releaes with each semver component. For example, the version `1.3.2` will create three releases (`1`, `1.3`, `1.3.2`) and each will have it own downloadable source URL.
+
+A `latest` release will be updated at every publication.
 
 ```
 USAGE
   $ terrac publish [--overwrite] [--work-directory <value>]
 
 FLAGS
-  --overwrite                    Overwrite a published version with new package
-  --work-directory=<value>       [default: .] Work directory for the module publication
+  --overwrite               Overwrite a published version with a new package
+  --work-directory=<value>  [default: .] Root directory of the module project
 
 DESCRIPTION
-  Publish a terraform module
+  Publish a terraform module.
 
 EXAMPLES
   $ terrac publish
+
+  $ terrac publish --overwrite
 ```
 
 _See code: [src/commands/publish.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/publish.ts)_
+
+####
 
 <!-- commandsstop -->
 
@@ -363,7 +384,7 @@ It may be possible to configure a storage backend for these features but this is
    * [x] Add `init` command to interatively initialize a module project
    * [x] Add schema check to the terrac configuration file
    * [x] Add support to any custom version name in the `get` and `publish` commands
-   * [ ] Add support to using partial semver in the `get` and `list` commands
+   * [x] Add support to using partial semver in the `get` command
    * [ ] Add support to [OpenTofu](https://opentofu.org)
    * [ ] Install with brew
    * [x] Install with bash script
