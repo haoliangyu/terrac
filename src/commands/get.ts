@@ -1,6 +1,6 @@
-import {EOL} from 'node:os'
 import {Args, Flags, Command} from '@oclif/core'
 import * as Joi from 'joi'
+import {EOL} from 'node:os'
 
 import {loadConfig, parseConfigOverwrites, backendConfigSchema, moduleConfigSchema, validateConfig, resolveVersion} from '../utils'
 import {BackendFactory} from '../backends/factory'
@@ -14,26 +14,32 @@ export default class Get extends Command {
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-module',
-    '<%= config.bin %> <%= command.id %> my-module 1.2.3',
+    '<%= config.bin %> <%= command.id %> my-module latest',
+    '<%= config.bin %> <%= command.id %> my-module 1.3.2',
+    '<%= config.bin %> <%= command.id %> my-module 1.3',
+    '<%= config.bin %> <%= command.id %> --exact my-module 1.3',
   ]
 
   static args = {
     name: Args.string({
-      description: 'Module name.',
+      description: 'Module name',
       required: true,
     }),
     version: Args.string({
       description: [
-        'Module version. It could be omitted, or a complete semver.',
-        'If omitted, it will resolve to the latest version.',
-        'If a complete semver is given, it will resolve to the exact version.',
+        'Module version. This could be a version name (like latest), a semver, or a semver component.',
+        'By default, terrac will verify the release with the input version and generate the source URL.',
+        'If it needs to resolve to an exact version, use the --exact flag.',
       ].join(EOL),
       required: false,
-      default: 'latest',
     }),
   }
 
   static flags = {
+    exact: Flags.boolean({
+      summary: 'Whether to resolve to an exact version if a named version or a semver component is given',
+      default: false,
+    }),
     'work-directory': Flags.string({
       summary: 'Root directory of the module configuration',
       default: '.',
@@ -57,12 +63,17 @@ export default class Get extends Command {
     const backend = BackendFactory.create(config.backend)
     const meta = await backend.getMeta(name)
 
-    const resolvedVersion = resolveVersion(meta, version)
-    const sourceUrl = await backend.getSourceUrl(name, resolvedVersion)
+    const outputVersion = version ?
+      (flags.exact ? resolveVersion(meta, version) : version) :
+      resolveVersion(meta, 'latest')
+    const sourceUrl = await backend.getSourceUrl(name, outputVersion)
 
-    this.logJson({
-      version: resolvedVersion,
-      source: sourceUrl,
-    })
+    if (flags.exact && version !== outputVersion) {
+      this.log(`The input version is resolved to the exact version ${outputVersion} and available at ${sourceUrl}`)
+    } else if (version) {
+      this.log(`The release ${version} is found and available at ${sourceUrl}`)
+    } else {
+      this.log(`The latest release ${outputVersion} is found and available at ${sourceUrl}`)
+    }
   }
 }

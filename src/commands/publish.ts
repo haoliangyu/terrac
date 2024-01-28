@@ -1,5 +1,5 @@
-import {Command, Flags} from '@oclif/core'
-import {tmpdir} from 'node:os'
+import {Command, Flags, ux} from '@oclif/core'
+import {tmpdir, EOL} from 'node:os'
 import {unlink} from 'fs-extra'
 import {zip} from 'zip-a-folder'
 import * as Joi from 'joi'
@@ -15,10 +15,11 @@ const requiredConfigSchema = Joi.object({
 })
 
 export default class Publish extends Command {
-  static description = 'Publish a terraform module'
+  static description = 'Publish a terraform module.'
 
   static examples = [
     '<%= config.bin %> <%= command.id %>',
+    '<%= config.bin %> <%= command.id %> --overwrite',
   ]
 
   static flags = {
@@ -75,16 +76,16 @@ export default class Publish extends Command {
     const meta = await backend.getMeta(name)
     const existingRelease = meta.releases.find(release => release.version === version)
 
-    const updated = Date.now()
-    meta.updated = updated
+    const updatedTime = Date.now()
+    meta.updated = updatedTime
 
     if (flags.overwrite && existingRelease) {
-      existingRelease.updated = updated
+      existingRelease.updated = updatedTime
     } else {
       meta.version = version
       meta.releases.push({
         version,
-        updated,
+        updated: updatedTime,
       })
     }
 
@@ -92,7 +93,22 @@ export default class Publish extends Command {
 
     await unlink(zipPath)
 
-    const sourceUrl = await backend.getSourceUrl(name, version)
-    this.log(`The module is published and available with the source URL: ${sourceUrl}`)
+    const data = await Promise.all(versions.map(async v => {
+      return {
+        version: v,
+        url: await backend.getSourceUrl(name, v),
+      }
+    }))
+
+    this.log(`A new release (${version}) is published successfully. Here is a list of updated releases:` + EOL)
+
+    ux.table(data, {
+      version: {
+        header: 'Version',
+      },
+      url: {
+        header: 'Source URL',
+      },
+    })
   }
 }

@@ -1,7 +1,7 @@
 {
   "backend": {
     "type": "local",
-    "path": "./"
+    "path": "."
   },
   "module": {
     "name": "test-module",
