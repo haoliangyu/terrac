@@ -77,7 +77,7 @@ As a node.js application, terrac can be installed with [npm](https://www.npmjs.c
 npm install -g terrac
 ```
 
-## manual
+### manual
 
 Binaries for diefferent platforms are provided as attachment at each [GitHub release](https://github.com/haoliangyu/terrac/releases):
 
