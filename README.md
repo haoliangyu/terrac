@@ -165,7 +165,7 @@ The `module` object describes the meta information for the module to publish:
 
 ### `terrac init`
 
-Initialize terrac configuration in a directory.
+Initialize terrac configuration in a directory. It will provide an interactive questionnaire for the selected backend and create the `terrac.json` configuration file at the local directory.
 
 ```
 USAGE
@@ -213,11 +213,17 @@ EXAMPLES
   $ terrac get --exact my-module 1.3
 ```
 
+The command will try to automatically resolve to the desired version. If the version is found at the backend, it will provide the download URL as output
+
+```
+The release 1.3.2 is found and available at s3::https://s3-us-east-1.amazonaws.com/test-bucket/test-module/1.3.2/module.zip
+```
+
 The output URL can be used in the module `source` property. For example,
 
 ``` terraform
 module "example" {
-  source = "output_source_url"
+  source = "s3::https://s3-us-east-1.amazonaws.com/test-bucket/test-module/1.3.2/module.zip"
 }
 ```
 
@@ -246,6 +252,8 @@ EXAMPLES
   $ terrac list my-module
 ```
 
+If the module name is provided, it will print a list of available versions for the given module. Otherwise, it will list all published modules in the backend.
+
 _See code: [src/commands/list.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/list.ts)_
 
 ### `terrac publish`
@@ -270,6 +278,8 @@ EXAMPLES
 
   $ terrac publish --overwrite
 ```
+
+Once the publication is successful, it will list all updated releases with the download URLs.
 
 _See code: [src/commands/publish.ts](https://github.com/haoliangyu/terrac/blob/master/src/commands/publish.ts)_
 
@@ -385,7 +395,6 @@ It may be possible to configure a storage backend for these features but this is
    * [x] Add schema check to the terrac configuration file
    * [x] Add support to any custom version name in the `get` and `publish` commands
    * [x] Add support to using partial semver in the `get` command
-   * [ ] Add support to [OpenTofu](https://opentofu.org)
    * [ ] Install with brew
    * [x] Install with bash script
    * [x] Install with standalone executable in different OS
@@ -396,6 +405,7 @@ It may be possible to configure a storage backend for these features but this is
    * [x] Azure Blob Storage
 
 * Maintenance
+  * [ ] Add E2E tests with `terraform` and `OpenTofu`
   * [ ] Unit tests for `init` command
   * [ ] Automate release process to cut GitHub release
 
