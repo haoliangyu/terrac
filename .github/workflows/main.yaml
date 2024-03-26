@@ -99,6 +99,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - shell: bash
-        run: |
-          bash scripts/install.sh
-          terrac --help
+        run: bash scripts/install.sh
+      - shell: baseh
+        run: terrac --help
