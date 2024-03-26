@@ -39,17 +39,19 @@ if [ "$os" = "Darwin" ] || [ "$os" = "Linux" ]; then
   # Determine the download URL based on the operating system
   case "$os" in
     Darwin)
+      install_dir=$home_dir/bin
       download_url="https://github.com/haoliangyu/terrac/releases/download/$latest_release/terrac-macos"
       ;;
     Linux)
+      install_dir=$home_dir/.local/bin
       download_url="https://github.com/haoliangyu/terrac/releases/download/$latest_release/terrac-linux"
       ;;
   esac
 
   # Download the binary
-  mkdir $home_dir/bin
-  curl -o "$home_dir/bin/terrac" -J -L -H "Accept: application/octet-stream" "$download_url"
-  chmod +x "$home_dir/bin/terrac"
+  mkdir $install_dir
+  curl -o "$install_dir/terrac" -J -L -H "Accept: application/octet-stream" "$download_url"
+  chmod +x "$install_dir/terrac"
 else
   echo "Unsupported operating system: $os"
   exit 1
@@ -59,22 +61,14 @@ echo ''
 echo 'Terrac is installed successfully. You can run "terrac --help" to verify.'
 
 # Check if ~/bin is already in PATH
-if echo "$PATH" | grep -q "$home_dir/bin"; then
-  echo "Path '$home_dir/bin' is already in PATH."
+if echo "$PATH" | grep -q "$install_dir"; then
+  echo "Path '$install_dir' is already in PATH."
 else
   # Add ~/bin to PATH and update shell configuration file
-  echo "export PATH=\"$home_dir/bin:\$PATH\"" >> "$home_dir/$shell_rc"
-  echo "Added '$home_dir/bin' to PATH in $shell_rc."
+  echo "export PATH=\"$install_dir:\$PATH\"" >> "$home_dir/$shell_rc"
+  echo "Added '$install_dir' to PATH in $shell_rc."
 
   # Apply the changes to the current shell session
   source "$home_dir/$shell_rc"
   echo "Changes applied to the current shell session."
-
-  if [ "$os" = "Linux" ]; then
-    echo "PATH=\"$home_dir/bin:\$PATH\"" >> "$home_dir/.profile"
-    echo "Added '$home_dir/bin' to PATH in .profile."
-
-    source "$home_dir/.profile"
-    echo "Changes applied to the current profile."
-  fi
 fi
