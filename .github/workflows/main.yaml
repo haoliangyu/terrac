@@ -100,5 +100,5 @@ jobs:
       - uses: actions/checkout@v4
       - shell: bash
         run: bash scripts/install.sh
-      - shell: baseh
+      - shell: bash
         run: terrac --help
