@@ -89,7 +89,7 @@ You can simply download a binary and put it in a directoy included in the `PATH`
 
 ### bash
 
-The following script automates the manual installation with a bash script in Linux and MacOS. `sudo` permission is required.
+The following script automates the manual installation with a bash script in Linux and MacOS.
 
 ``` bash
 curl https://raw.githubusercontent.com/haoliangyu/terrac/main/scripts/install.sh | bash
