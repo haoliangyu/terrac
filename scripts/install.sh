@@ -70,5 +70,6 @@ else
   source "$home_dir/$shell_rc"
   echo "Changes applied to the current shell session."
 
+  cat "$home_dir/$shell_rc"
   echo $PATH
 fi
