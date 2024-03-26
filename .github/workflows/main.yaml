@@ -90,6 +90,7 @@ jobs:
           target: minor
 
   install-script-test:
+    if: github.ref_name == 'main'
     strategy:
       matrix:
         os:
@@ -102,3 +103,33 @@ jobs:
         run: |
           bash scripts/install.sh
           terrac --help
+
+  e2e-terraform-test:
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node
+        with:
+          node-version: 18
+          cache: npm
+      - uses: hashicorp/setup-terraform@v3
+      - run: npm ci
+      - run: npm run test:e2e:terraform
+    needs:
+      - backend-s3-test
+
+  e2e-opentofu-test:
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node
+        with:
+          node-version: 18
+          cache: npm
+      - uses: opentofu/setup-opentofu@v1
+      - run: npm ci
+      - run: npm run test:e2e:opentofu
+    needs:
+      - backend-s3-test

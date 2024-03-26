@@ -78,6 +78,8 @@
     "test:backends:azure": "bash scripts/test-backend-azure/run.sh",
     "test:backends:s3": "bash scripts/test-backend-s3.sh",
     "test:backends:local": "mocha --forbid-only \"test/backends/local.test.ts\"",
+    "test:e2e:terraform": "bash scripts/test-e2e-terraform.sh",
+    "test:e2e:opentofu": "bash scripts/test-e2e-opentofu.sh",
     "prepare": "husky install"
   },
   "engines": {
