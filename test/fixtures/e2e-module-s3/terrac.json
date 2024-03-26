@@ -1,0 +1,11 @@
+{
+  "backend": {
+    "type": "s3",
+    "bucket": "terrac-test",
+    "region": "us-east-1"
+  },
+  "module": {
+    "name": "test-module",
+    "version": "1.3.3"
+  }
+}
