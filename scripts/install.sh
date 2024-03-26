@@ -69,4 +69,6 @@ else
   # Apply the changes to the current shell session
   source "$home_dir/$shell_rc"
   echo "Changes applied to the current shell session."
+
+  echo $PATH
 fi
