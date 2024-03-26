@@ -70,6 +70,11 @@ else
   source "$home_dir/$shell_rc"
   echo "Changes applied to the current shell session."
 
-  cat "$home_dir/$shell_rc"
-  echo $PATH
+  if [ "$os" = "Linux" ]; then
+    echo "export PATH=\"$home_dir/bin:\$PATH\"" >> "$home_dir/.profile"
+    echo "Added '$home_dir/bin' to PATH in .profile."
+
+    source "$home_dir/.profile"
+    echo "Changes applied to the current profile."
+  fi
 fi
