@@ -10,6 +10,7 @@ export AWS_SECRET_ACCESS_KEY=test
 # make sure localstack is running
 docker pull localstack/localstack
 localstack start -d
+localstack wait -t 30
 
 # make sure test bucket exists
 awslocal s3api create-bucket --bucket $TEST_BUCKET

@@ -12,4 +12,5 @@ oclif.manifest.json
 tsconfig.tsbuildinfo
 .DS_Store
 .env
+.terraform
 scripts/test-backend-azure/data

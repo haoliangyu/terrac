@@ -4,8 +4,6 @@ provider "aws" {
 
 variable "aws_region" {}
 
-data "aws_caller_identity" "current" {}
-
 module "test" {
-  source = ""
+  source = "http://localhost:4566/terrac-test/test-module/1.3.3/module.zip"
 }
