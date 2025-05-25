@@ -49,7 +49,7 @@ if [ "$os" = "Darwin" ] || [ "$os" = "Linux" ]; then
   esac
 
   # Download the binary
-  mkdir $install_dir
+  mkdir -p $install_dir
   curl -o "$install_dir/terrac" -J -L -H "Accept: application/octet-stream" "$download_url"
   chmod +x "$install_dir/terrac"
 else
