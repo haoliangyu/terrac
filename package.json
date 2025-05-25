@@ -96,7 +96,7 @@
   ],
   "types": "dist/index.d.ts",
   "volta": {
-    "node": "18.18.0",
-    "npm": "9.8.1"
+    "node": "22.16.0",
+    "npm": "10.9.2"
   }
 }
