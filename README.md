@@ -77,7 +77,7 @@ As a node.js application, terrac can be installed with [npm](https://www.npmjs.c
 npm install -g terrac
 ```
 
-## manual
+### manual
 
 Binaries for diefferent platforms are provided as attachment at each [GitHub release](https://github.com/haoliangyu/terrac/releases):
 
@@ -89,7 +89,7 @@ You can simply download a binary and put it in a directoy included in the `PATH`
 
 ### bash
 
-The following script automates the manual installation with a bash script in Linux and MacOS. `sudo` permission is required.
+The following script automates the manual installation with a bash script in Linux and MacOS.
 
 ``` bash
 curl https://raw.githubusercontent.com/haoliangyu/terrac/main/scripts/install.sh | bash
