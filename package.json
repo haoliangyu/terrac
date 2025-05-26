@@ -1,6 +1,6 @@
 {
   "name": "terrac",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A minimal private module registry for Terraform and OpenTofu",
   "author": "Haoliang Yu @haoliangyu",
   "bin": {
