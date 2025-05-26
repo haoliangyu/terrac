@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   unit-test:
@@ -88,20 +89,6 @@ jobs:
       - uses: fastify/github-action-merge-dependabot@v3
         with:
           target: minor
-
-  install-script-test:
-    strategy:
-      matrix:
-        os:
-          - ubuntu
-          - macos
-    runs-on: ${{ matrix.os }}-latest
-    steps:
-      - uses: actions/checkout@v4
-      - shell: bash
-        run: |
-          bash scripts/install.sh
-          terrac --help
 
   e2e-terraform-test:
     runs-on: ubuntu-latest

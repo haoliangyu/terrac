@@ -1,0 +1,27 @@
+name: main
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - scripts/install.sh
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  install-script-test:
+    strategy:
+      matrix:
+        os:
+          - ubuntu
+          - macos
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        run: |
+          bash scripts/install.sh
+          terrac --help
