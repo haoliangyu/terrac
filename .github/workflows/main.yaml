@@ -130,6 +130,8 @@ jobs:
 
   e2e-opentofu-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
