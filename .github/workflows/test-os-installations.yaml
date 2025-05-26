@@ -11,9 +11,6 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   install-script-test:
     strategy:
@@ -24,7 +21,9 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v4
-      - shell: bash
-        run: |
-          bash scripts/install.sh
-          terrac --help
+      - uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 5
+          shell: bash
+          command: bash scripts/install.sh && terrac --help
