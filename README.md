@@ -390,22 +390,24 @@ It may be possible to configure a storage backend for these features but this is
 <!-- roadmap -->
 
 * Features
-   * [x] Add `overwrite` option to the `publish` command
-   * [x] Add `init` command to interatively initialize a module project
-   * [x] Add schema check to the terrac configuration file
-   * [x] Add support to any custom version name in the `get` and `publish` commands
-   * [x] Add support to using partial semver in the `get` command
-   * [ ] Install with brew
-   * [x] Install with bash script
-   * [x] Install with standalone executable in different OS
-   * [ ] Use backend configuration schema to configure `init` command questionnaire
+  * [x] Add `overwrite` option to the `publish` command
+  * [x] Add `init` command to interatively initialize a module project
+  * [x] Add schema check to the terrac configuration file
+  * [x] Add support to any custom version name in the `get` and `publish` commands
+  * [x] Add support to using partial semver in the `get` command
+  * [ ] Install with brew
+  * [x] Install with bash script
+  * [x] Install with standalone executable in different OS
+  * [ ] Use backend configuration schema to configure `init` command questionnaire
 
 * Backends
-   * [x] GCP Cloud Storage
-   * [x] Azure Blob Storage
+  * [x] Local
+  * [x] AWS S3
+  * [x] GCP Cloud Storage
+  * [x] Azure Blob Storage
 
 * Maintenance
-  * [ ] Add E2E tests with `terraform` and `OpenTofu`
+  * [x] Add E2E tests with `terraform` and `OpenTofu`
   * [ ] Unit tests for `init` command
   * [ ] Automate release process to cut GitHub release
 

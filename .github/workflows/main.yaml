@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   unit-test:
@@ -89,16 +90,52 @@ jobs:
         with:
           target: minor
 
-  install-script-test:
-    strategy:
-      matrix:
-        os:
-          - ubuntu
-          - macos
-    runs-on: ${{ matrix.os }}-latest
+  e2e-terraform-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - shell: bash
-        run: bash scripts/install.sh
-      - shell: bash
-        run: terrac --help
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: hashicorp/setup-terraform@v3
+      - name: Start LocalStack
+        run: |
+          pip install localstack awscli-local       # install LocalStack cli and awslocal
+          docker pull localstack/localstack         # Make sure to pull the latest version of the image
+          localstack start -d                       # Start LocalStack in the background
+
+          echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
+          localstack wait -t 30                     # to become ready before timing out
+          echo "Startup complete"
+      - run: npm ci
+      - run: npm run test:e2e:terraform
+    needs:
+      - backend-s3-test
+
+  e2e-opentofu-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: opentofu/setup-opentofu@v1
+      - name: Start LocalStack
+        run: |
+          pip install localstack awscli-local       # install LocalStack cli and awslocal
+          docker pull localstack/localstack         # Make sure to pull the latest version of the image
+          localstack start -d                       # Start LocalStack in the background
+
+          echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
+          localstack wait -t 30                     # to become ready before timing out
+          echo "Startup complete"
+      - run: npm ci
+      - run: npm run test:e2e:opentofu
+    needs:
+      - backend-s3-test
